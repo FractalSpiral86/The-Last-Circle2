@@ -5,60 +5,358 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The Last Circle</title>
   <style>
-    :root { --size: 44px; --gap: 12px; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      margin: 0; padding: 24px;
-      display: grid; place-items: center;
-      background: #0b0b0b; color: #f2f2f2;
+    :root{
+      --bg0:#07070a;
+      --bg1:#0b0b12;
+      --card:#0f1017cc;
+      --stroke:#e9ecff;
+      --muted:#aab0d6;
+      --accent:#7c5cff;
+      --accent2:#00e5ff;
+      --danger:#ff3d71;
+
+      --size: 44px;
+      --gap: 12px;
+      --ring: 2px;
+      --radius: 18px;
+      --shadow: 0 24px 70px rgba(0,0,0,.55);
+      --shadow2: 0 10px 30px rgba(0,0,0,.55);
     }
-    .wrap { width: min(520px, 100%); }
-    h1 { font-size: 18px; font-weight: 650; margin: 0 0 18px; opacity: .9; }
-    .board { display: grid; gap: 14px; padding: 18px; border-radius: 14px; background: #141414; }
-    .row { display: flex; gap: var(--gap); justify-content: center; }
-    .circle {
-      width: var(--size); height: var(--size);
+
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--stroke);
+      background:
+        radial-gradient(900px 520px at 15% 20%, rgba(124,92,255,.24), transparent 55%),
+        radial-gradient(700px 520px at 85% 10%, rgba(0,229,255,.18), transparent 55%),
+        radial-gradient(900px 620px at 60% 100%, rgba(255,61,113,.12), transparent 55%),
+        linear-gradient(180deg, var(--bg0), var(--bg1));
+      display:grid;
+      place-items:center;
+      padding: 22px;
+      overflow-x:hidden;
+    }
+
+    /* subtle animated grain */
+    body::before{
+      content:"";
+      position:fixed; inset:-50%;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.35'/%3E%3C/svg%3E");
+      opacity:.06;
+      transform: rotate(6deg);
+      pointer-events:none;
+      mix-blend-mode: overlay;
+    }
+
+    .wrap{
+      width:min(860px, 100%);
+      display:grid;
+      gap: 14px;
+    }
+
+    .topbar{
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap: 16px;
+      padding: 10px 6px;
+    }
+
+    .title{
+      display:grid;
+      gap: 6px;
+      line-height:1.05;
+    }
+
+    .title h1{
+      margin:0;
+      font-size: clamp(18px, 2.4vw, 26px);
+      letter-spacing: .6px;
+      text-transform: uppercase;
+      font-weight: 800;
+    }
+
+    .title .sub{
+      margin:0;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing:.25px;
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow2);
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .dot{
+      width: 9px; height: 9px;
       border-radius: 50%;
-      border: 2px solid #f2f2f2;
+      background: radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,.2) 40%, rgba(255,255,255,0) 70%),
+                  linear-gradient(90deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 18px rgba(124,92,255,.55);
+    }
+
+    .panel{
+      position:relative;
+      border-radius: calc(var(--radius) + 6px);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+
+    .panel::before{
+      content:"";
+      position:absolute; inset: -2px;
+      background:
+        radial-gradient(400px 180px at 20% 0%, rgba(124,92,255,.35), transparent 60%),
+        radial-gradient(420px 220px at 85% 20%, rgba(0,229,255,.25), transparent 60%),
+        radial-gradient(420px 220px at 70% 110%, rgba(255,61,113,.16), transparent 60%);
+      filter: blur(0px);
+      opacity:.9;
+      pointer-events:none;
+    }
+
+    .panel-inner{
+      position:relative;
+      padding: 18px;
+      background: rgba(10,10,16,.58);
+      border-radius: calc(var(--radius) + 6px);
+    }
+
+    .board{
+      display:grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: var(--radius);
+      background: rgba(0,0,0,.22);
+      border: 1px solid rgba(255,255,255,.08);
+      backdrop-filter: blur(10px);
+    }
+
+    /* LEFT-ALIGNED ROWS (not pyramid) */
+    .row{
+      display:flex;
+      gap: var(--gap);
+      justify-content:flex-start; /* <-- left aligned */
+      align-items:center;
+      padding: 10px 10px;
+      border-radius: 14px;
+      background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
+      border: 1px solid rgba(255,255,255,.08);
+      box-shadow: 0 8px 22px rgba(0,0,0,.35);
+    }
+
+    .row-label{
+      min-width: 78px;
+      font-size: 12px;
+      letter-spacing: .6px;
+      color: var(--muted);
+      text-transform: uppercase;
+      opacity:.9;
+      display:flex;
+      align-items:center;
+      gap: 8px;
+    }
+
+    .row-label::before{
+      content:"";
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.14);
+      border: 1px solid rgba(255,255,255,.18);
+      box-shadow: 0 0 0 3px rgba(124,92,255,.10);
+    }
+
+    .circles{
+      display:flex;
+      gap: var(--gap);
+      flex-wrap: wrap;
+    }
+
+    .circle{
+      width: var(--size);
+      height: var(--size);
+      border-radius: 50%;
       background: transparent;
+      border: var(--ring) solid rgba(233,236,255,.78);
       cursor: pointer;
       touch-action: manipulation;
-      transition: transform .06s ease, background .12s ease;
+      position: relative;
+      transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
+      outline: none;
+      padding:0;
     }
-    .circle:active { transform: scale(.96); }
-    .circle.filled { background: #f2f2f2; }
 
-    .controls {
-      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+    .circle::after{
+      content:"";
+      position:absolute; inset: -7px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 35% 35%, rgba(124,92,255,.35), rgba(0,229,255,.10) 45%, transparent 70%);
+      opacity: 0;
+      filter: blur(6px);
+      transition: opacity .15s ease;
+      pointer-events:none;
+    }
+
+    .circle:hover{
+      border-color: rgba(255,255,255,.92);
+      box-shadow: 0 0 0 4px rgba(124,92,255,.14), 0 10px 26px rgba(0,0,0,.35);
+      transform: translateY(-1px);
+    }
+
+    .circle:active{ transform: translateY(0px) scale(.96); }
+
+    .circle.filled{
+      border-color: rgba(255,255,255,.90);
+      background:
+        radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.30) 35%, rgba(255,255,255,0) 60%),
+        linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,229,255,.75));
+      box-shadow:
+        0 0 0 4px rgba(124,92,255,.20),
+        0 12px 28px rgba(0,0,0,.45),
+        0 0 26px rgba(124,92,255,.32);
+    }
+
+    .circle.filled::after{ opacity: 1; }
+
+    .controls{
+      display:flex;
+      gap: 10px;
+      justify-content:flex-start;
+      flex-wrap: wrap;
       margin-top: 14px;
     }
-    button {
+
+    .btn{
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--stroke);
       padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #2a2a2a;
-      background: #1b1b1b;
-      color: #f2f2f2;
-      cursor: pointer;
+      border-radius: 12px;
+      cursor:pointer;
+      transition: transform .08s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
+      font-weight: 650;
+      letter-spacing: .2px;
+      display:inline-flex;
+      align-items:center;
+      gap: 8px;
+      box-shadow: 0 10px 26px rgba(0,0,0,.35);
+      user-select:none;
     }
-    button:hover { background: #222; }
-    button:disabled { opacity: .45; cursor: not-allowed; }
-    .note { margin-top: 10px; font-size: 12px; opacity: .7; text-align:center; }
+
+    .btn:hover{
+      background: rgba(255,255,255,.09);
+      border-color: rgba(255,255,255,.22);
+      transform: translateY(-1px);
+    }
+
+    .btn:active{ transform: translateY(0px) scale(.98); }
+
+    .btn.primary{
+      background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(0,229,255,.30));
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .btn.danger{
+      background: linear-gradient(135deg, rgba(255,61,113,.55), rgba(124,92,255,.20));
+      border-color: rgba(255,255,255,.16);
+    }
+
+    .btn:disabled{
+      opacity:.45;
+      cursor:not-allowed;
+      transform:none;
+      box-shadow:none;
+    }
+
+    .status{
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--muted);
+      display:flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items:center;
+      justify-content:space-between;
+    }
+
+    .pill{
+      display:inline-flex;
+      gap: 8px;
+      align-items:center;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      padding: 2px 7px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,.14);
+      background: rgba(0,0,0,.25);
+      color: rgba(233,236,255,.92);
+    }
+
+    @media (max-width: 430px){
+      :root{ --size: 40px; --gap: 10px; }
+      .row-label{ min-width: 70px; }
+      .panel-inner{ padding: 14px; }
+      .board{ padding: 12px; }
+    }
   </style>
 </head>
+
 <body>
   <div class="wrap">
-    <h1>The Last Circle (tap to fill/unfill)</h1>
-
-    <div id="board" class="board" aria-label="game board"></div>
-
-    <div class="controls">
-      <button id="undoBtn" disabled>Undo</button>
-      <button id="clearBtn">Clear</button>
-      <button id="restartBtn">Restart</button>
+    <div class="topbar">
+      <div class="title">
+        <h1>The Last Circle</h1>
+        <p class="sub">Tap circles to toggle • Built for mobile • Left-aligned rows (no pyramid)</p>
+      </div>
+      <div class="badge" title="GitHub Pages ready">
+        <span class="dot"></span>
+        LIVE BUILD
+      </div>
     </div>
 
-    <div class="note">
-      “Clear” empties all circles. “Restart” restores the original layout (same here for now).
+    <div class="panel">
+      <div class="panel-inner">
+        <div id="board" class="board" aria-label="game board"></div>
+
+        <div class="controls">
+          <button id="undoBtn" class="btn" disabled title="Undo last move (Ctrl/⌘ + Z)">
+            ↩ Undo
+          </button>
+          <button id="clearBtn" class="btn danger" title="Clear all filled circles">
+            ✖ Clear
+          </button>
+          <button id="restartBtn" class="btn primary" title="Restart board">
+            ⟳ Restart
+          </button>
+        </div>
+
+        <div class="status">
+          <div class="pill">Moves: <strong id="moves">0</strong></div>
+          <div class="pill">Tip: <span class="kbd">Ctrl</span>+<span class="kbd">Z</span> Undo</div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -70,24 +368,32 @@
     const undoBtn = document.getElementById('undoBtn');
     const clearBtn = document.getElementById('clearBtn');
     const restartBtn = document.getElementById('restartBtn');
+    const movesEl = document.getElementById('moves');
 
     // state: array of arrays of booleans
     let state = [];
     let history = []; // stack of previous states
+    let moves = 0;
 
     function deepCopyState(s) {
       return s.map(row => row.slice());
     }
 
+    function setMoves(n){
+      moves = n;
+      movesEl.textContent = String(moves);
+    }
+
     function init() {
       state = ROWS.map(n => Array(n).fill(false));
       history = [];
+      setMoves(0);
       render();
       updateButtons();
     }
 
     function pushHistory() {
-      history.push(deepCopyState(state));
+      history.push({ state: deepCopyState(state), moves });
       updateButtons();
     }
 
@@ -97,29 +403,43 @@
 
     function render() {
       boardEl.innerHTML = '';
+
       state.forEach((row, rIdx) => {
         const rowEl = document.createElement('div');
         rowEl.className = 'row';
 
+        const label = document.createElement('div');
+        label.className = 'row-label';
+        label.textContent = `Row ${rIdx + 1}`;
+
+        const circles = document.createElement('div');
+        circles.className = 'circles';
+
         row.forEach((filled, cIdx) => {
           const btn = document.createElement('button');
+          btn.type = 'button';
           btn.className = 'circle' + (filled ? ' filled' : '');
           btn.setAttribute('aria-label', `Row ${rIdx + 1} circle ${cIdx + 1}`);
           btn.addEventListener('click', () => {
             pushHistory();
             state[rIdx][cIdx] = !state[rIdx][cIdx];
+            setMoves(moves + 1);
             render();
           });
-          rowEl.appendChild(btn);
+          circles.appendChild(btn);
         });
 
+        rowEl.appendChild(label);
+        rowEl.appendChild(circles);
         boardEl.appendChild(rowEl);
       });
     }
 
     undoBtn.addEventListener('click', () => {
       if (!history.length) return;
-      state = history.pop();
+      const last = history.pop();
+      state = last.state;
+      setMoves(last.moves);
       render();
       updateButtons();
     });
@@ -127,12 +447,20 @@
     clearBtn.addEventListener('click', () => {
       pushHistory();
       state = state.map(row => row.map(() => false));
+      setMoves(moves + 1);
       render();
     });
 
     restartBtn.addEventListener('click', () => {
-      // For now restart = reset board and clear history
       init();
+    });
+
+    // Keyboard undo: Ctrl/⌘ + Z
+    window.addEventListener('keydown', (e) => {
+      const isUndo = (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z';
+      if (!isUndo) return;
+      e.preventDefault();
+      undoBtn.click();
     });
 
     init();
