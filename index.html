@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>The Last Circle</title>
+  <style>
+    :root { --size: 44px; --gap: 12px; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0; padding: 24px;
+      display: grid; place-items: center;
+      background: #0b0b0b; color: #f2f2f2;
+    }
+    .wrap { width: min(520px, 100%); }
+    h1 { font-size: 18px; font-weight: 650; margin: 0 0 18px; opacity: .9; }
+    .board { display: grid; gap: 14px; padding: 18px; border-radius: 14px; background: #141414; }
+    .row { display: flex; gap: var(--gap); justify-content: center; }
+    .circle {
+      width: var(--size); height: var(--size);
+      border-radius: 50%;
+      border: 2px solid #f2f2f2;
+      background: transparent;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .06s ease, background .12s ease;
+    }
+    .circle:active { transform: scale(.96); }
+    .circle.filled { background: #f2f2f2; }
+
+    .controls {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      margin-top: 14px;
+    }
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #2a2a2a;
+      background: #1b1b1b;
+      color: #f2f2f2;
+      cursor: pointer;
+    }
+    button:hover { background: #222; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .note { margin-top: 10px; font-size: 12px; opacity: .7; text-align:center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>The Last Circle (tap to fill/unfill)</h1>
+
+    <div id="board" class="board" aria-label="game board"></div>
+
+    <div class="controls">
+      <button id="undoBtn" disabled>Undo</button>
+      <button id="clearBtn">Clear</button>
+      <button id="restartBtn">Restart</button>
+    </div>
+
+    <div class="note">
+      “Clear” empties all circles. “Restart” restores the original layout (same here for now).
+    </div>
+  </div>
+
+  <script>
+    // Row sizes: 3, 4, 5, 6
+    const ROWS = [3, 4, 5, 6];
+
+    const boardEl = document.getElementById('board');
+    const undoBtn = document.getElementById('undoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const restartBtn = document.getElementById('restartBtn');
+
+    // state: array of arrays of booleans
+    let state = [];
+    let history = []; // stack of previous states
+
+    function deepCopyState(s) {
+      return s.map(row => row.slice());
+    }
+
+    function init() {
+      state = ROWS.map(n => Array(n).fill(false));
+      history = [];
+      render();
+      updateButtons();
+    }
+
+    function pushHistory() {
+      history.push(deepCopyState(state));
+      updateButtons();
+    }
+
+    function updateButtons() {
+      undoBtn.disabled = history.length === 0;
+    }
+
+    function render() {
+      boardEl.innerHTML = '';
+      state.forEach((row, rIdx) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+
+        row.forEach((filled, cIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'circle' + (filled ? ' filled' : '');
+          btn.setAttribute('aria-label', `Row ${rIdx + 1} circle ${cIdx + 1}`);
+          btn.addEventListener('click', () => {
+            pushHistory();
+            state[rIdx][cIdx] = !state[rIdx][cIdx];
+            render();
+          });
+          rowEl.appendChild(btn);
+        });
+
+        boardEl.appendChild(rowEl);
+      });
+    }
+
+    undoBtn.addEventListener('click', () => {
+      if (!history.length) return;
+      state = history.pop();
+      render();
+      updateButtons();
+    });
+
+    clearBtn.addEventListener('click', () => {
+      pushHistory();
+      state = state.map(row => row.map(() => false));
+      render();
+    });
+
+    restartBtn.addEventListener('click', () => {
+      // For now restart = reset board and clear history
+      init();
+    });
+
+    init();
+  </script>
+</body>
+</html>
