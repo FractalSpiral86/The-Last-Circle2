@@ -1,377 +1,133 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>The Last Circle</title>
-  <style>
-    :root{
-      --bg0:#05060a;
-      --bg1:#0b0c14;
-      --glass: rgba(255,255,255,.06);
-      --glass2: rgba(255,255,255,.03);
-      --stroke: rgba(240,245,255,.85);
-      --muted: rgba(200,210,255,.62);
-      --accent:#7c5cff;
-      --accent2:#00e5ff;
-      --danger:#ff3d71;
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Last Circle</title>
 
-      --size: 46px;
-      --gap: 12px;
-      --ring: 2px;
-      --radius: 18px;
-      --shadow: 0 26px 80px rgba(0,0,0,.6);
-    }
+<style>
+  body {
+    margin: 0;
+    padding: 20px;
+    background: #111;
+    color: #fff;
+    font-family: Arial, sans-serif;
+  }
 
-    *{ box-sizing:border-box; }
-    html,body{ height:100%; }
+  h1 {
+    margin-bottom: 16px;
+  }
 
-    body{
-      margin:0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      color: var(--stroke);
-      background:
-        radial-gradient(900px 520px at 18% 20%, rgba(124,92,255,.22), transparent 55%),
-        radial-gradient(700px 520px at 85% 10%, rgba(0,229,255,.16), transparent 55%),
-        radial-gradient(900px 620px at 60% 100%, rgba(255,61,113,.10), transparent 55%),
-        linear-gradient(180deg, var(--bg0), var(--bg1));
-      display:grid;
-      place-items:center;
-      padding: 18px;
-    }
+  .board {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 20px;
+  }
 
-    .wrap{
-      width:min(920px, 100%);
-      display:grid;
-      gap: 14px;
-    }
+  .row {
+    display: flex;
+    gap: 10px;
+  }
 
-    .topbar{
-      display:flex;
-      align-items:flex-end;
-      justify-content:space-between;
-      gap: 12px;
-      padding: 6px 2px;
-    }
+  .circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: 2px solid #fff;
+    background: transparent;
+    cursor: pointer;
+  }
 
-    .title h1{
-      margin:0;
-      font-size: clamp(18px, 2.6vw, 28px);
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      font-weight: 900;
-    }
+  .circle.filled {
+    background: #fff;
+  }
 
-    .title p{
-      margin:6px 0 0;
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing:.25px;
-    }
+  .controls {
+    display: flex;
+    gap: 10px;
+  }
 
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 999px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: 0 12px 30px rgba(0,0,0,.45);
-      font-size: 12px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-    .dot{
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: linear-gradient(90deg, var(--accent), var(--accent2));
-      box-shadow: 0 0 18px rgba(124,92,255,.55);
-    }
-
-    .panel{
-      border-radius: 22px;
-      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.12);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .panel-inner{
-      padding: 16px;
-      background: rgba(10,10,16,.55);
-      backdrop-filter: blur(10px);
-    }
-
-    .board{
-      display:grid;
-      gap: 12px;
-      padding: 14px;
-      border-radius: 18px;
-      background: rgba(0,0,0,.25);
-      border: 1px solid rgba(255,255,255,.10);
-    }
-
-    /* Row: fixed left alignment */
-    .row{
-      display:grid;
-      grid-template-columns: 86px 1fr;
-      gap: 12px;
-      align-items:center;
-      padding: 12px;
-      border-radius: 16px;
-      background: linear-gradient(90deg, rgba(255,255,255,.06), rgba(255,255,255,.02));
-      border: 1px solid rgba(255,255,255,.10);
-    }
-
-    .row-label{
-      font-size: 12px;
-      color: var(--muted);
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      display:flex;
-      align-items:center;
-      gap: 10px;
-      user-select:none;
-    }
-    .row-label::before{
-      content:"";
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: rgba(255,255,255,.14);
-      border: 1px solid rgba(255,255,255,.18);
-      box-shadow: 0 0 0 3px rgba(124,92,255,.10);
-    }
-
-    /* IMPORTANT: do NOT wrap. If narrow, scroll horizontally. */
-    .circles{
-      display:flex;
-      gap: var(--gap);
-      align-items:center;
-      justify-content:flex-start;
-      flex-wrap: nowrap;         /* <-- stops pyramid */
-      overflow-x: auto;          /* <-- allows scroll on small screens */
-      overflow-y: hidden;
-      -webkit-overflow-scrolling: touch;
-      padding-bottom: 4px;
-      scrollbar-width: none;
-    }
-    .circles::-webkit-scrollbar{ display:none; }
-
-    .circle{
-      flex: 0 0 auto;            /* <-- prevents shrinking/wrapping */
-      width: var(--size);
-      height: var(--size);
-      border-radius: 50%;
-      border: var(--ring) solid rgba(240,245,255,.78);
-      background: transparent;
-      cursor:pointer;
-      touch-action: manipulation;
-      position:relative;
-      transition: transform .08s ease, border-color .15s ease, box-shadow .15s ease, background .15s ease;
-      padding:0;
-      outline:none;
-    }
-
-    .circle::after{
-      content:"";
-      position:absolute; inset:-7px;
-      border-radius: 999px;
-      background: radial-gradient(circle at 35% 35%, rgba(124,92,255,.35), rgba(0,229,255,.10) 45%, transparent 70%);
-      opacity: 0;
-      filter: blur(7px);
-      transition: opacity .15s ease;
-      pointer-events:none;
-    }
-
-    .circle:active{ transform: scale(.96); }
-
-    .circle.filled{
-      border-color: rgba(255,255,255,.92);
-      background:
-        radial-gradient(circle at 30% 30%, rgba(255,255,255,.95), rgba(255,255,255,.25) 35%, rgba(255,255,255,0) 60%),
-        linear-gradient(135deg, rgba(124,92,255,.95), rgba(0,229,255,.75));
-      box-shadow:
-        0 0 0 4px rgba(124,92,255,.18),
-        0 12px 28px rgba(0,0,0,.45),
-        0 0 26px rgba(124,92,255,.28);
-    }
-    .circle.filled::after{ opacity: 1; }
-
-    .controls{
-      display:flex;
-      gap: 10px;
-      justify-content:space-between;
-      flex-wrap: wrap;
-      margin-top: 14px;
-    }
-
-    .btn{
-      flex: 1 1 140px;
-      border: 1px solid rgba(255,255,255,.12);
-      background: rgba(255,255,255,.06);
-      color: var(--stroke);
-      padding: 12px 14px;
-      border-radius: 14px;
-      cursor:pointer;
-      transition: transform .08s ease, background .15s ease, border-color .15s ease;
-      font-weight: 800;
-      letter-spacing: .3px;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      gap: 8px;
-      user-select:none;
-    }
-    .btn:active{ transform: scale(.98); }
-    .btn.primary{
-      background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(0,229,255,.28));
-      border-color: rgba(255,255,255,.16);
-    }
-    .btn.danger{
-      background: linear-gradient(135deg, rgba(255,61,113,.55), rgba(124,92,255,.18));
-      border-color: rgba(255,255,255,.16);
-    }
-    .btn:disabled{ opacity:.45; cursor:not-allowed; }
-
-    .status{
-      margin-top: 12px;
-      display:flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content:space-between;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .chip{
-      padding: 9px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,.10);
-      background: rgba(255,255,255,.04);
-    }
-
-    @media (max-width: 430px){
-      :root{ --size: 44px; --gap: 10px; }
-      .row{ grid-template-columns: 76px 1fr; }
-      .panel-inner{ padding: 14px; }
-      .board{ padding: 12px; }
-    }
-  </style>
+  button {
+    padding: 10px 14px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+</style>
 </head>
 
 <body>
-  <div class="wrap">
-    <div class="topbar">
-      <div class="title">
-        <h1>THE LAST CIRCLE</h1>
-        <p>Left-aligned rows • One-line rows (no wrapping) • Scroll if needed</p>
-      </div>
-      <div class="pill"><span class="dot"></span> LIVE BUILD</div>
-    </div>
 
-    <div class="panel">
-      <div class="panel-inner">
-        <div id="board" class="board" aria-label="game board"></div>
+<h1>The Last Circle</h1>
 
-        <div class="controls">
-          <button id="undoBtn" class="btn" disabled>↩ Undo</button>
-          <button id="clearBtn" class="btn danger">✖ Clear</button>
-          <button id="restartBtn" class="btn primary">⟳ Restart</button>
-        </div>
+<div id="board" class="board"></div>
 
-        <div class="status">
-          <div class="chip">Moves: <strong id="moves">0</strong></div>
-          <div class="chip">Tip: swipe sideways inside a row if your phone is narrow</div>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="controls">
+  <button id="undo">Undo</button>
+  <button id="clear">Clear</button>
+  <button id="restart">Restart</button>
+</div>
 
-  <script>
-    // Row sizes: 3, 4, 5, 6
-    const ROWS = [3, 4, 5, 6];
+<script>
+  const ROWS = [3, 4, 5, 6];
 
-    const boardEl = document.getElementById('board');
-    const undoBtn = document.getElementById('undoBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const restartBtn = document.getElementById('restartBtn');
-    const movesEl = document.getElementById('moves');
+  let state = [];
+  let history = [];
 
-    let state = [];
-    let history = [];
-    let moves = 0;
+  const board = document.getElementById("board");
+  const undoBtn = document.getElementById("undo");
+  const clearBtn = document.getElementById("clear");
+  const restartBtn = document.getElementById("restart");
 
-    function deepCopyState(s){ return s.map(r => r.slice()); }
-    function setMoves(n){ moves = n; movesEl.textContent = String(moves); }
-    function updateButtons(){ undoBtn.disabled = history.length === 0; }
+  function copyState() {
+    return state.map(row => [...row]);
+  }
 
-    function init(){
-      state = ROWS.map(n => Array(n).fill(false));
-      history = [];
-      setMoves(0);
-      render();
-      updateButtons();
-    }
+  function init() {
+    state = ROWS.map(n => Array(n).fill(false));
+    history = [];
+    render();
+  }
 
-    function pushHistory(){
-      history.push({ state: deepCopyState(state), moves });
-      updateButtons();
-    }
+  function render() {
+    board.innerHTML = "";
 
-    function render(){
-      boardEl.innerHTML = '';
+    state.forEach((row, r) => {
+      const rowDiv = document.createElement("div");
+      rowDiv.className = "row";
 
-      state.forEach((row, rIdx) => {
-        const rowEl = document.createElement('div');
-        rowEl.className = 'row';
-
-        const label = document.createElement('div');
-        label.className = 'row-label';
-        label.textContent = `Row ${rIdx + 1}`;
-
-        const circles = document.createElement('div');
-        circles.className = 'circles';
-
-        row.forEach((filled, cIdx) => {
-          const btn = document.createElement('button');
-          btn.type = 'button';
-          btn.className = 'circle' + (filled ? ' filled' : '');
-          btn.setAttribute('aria-label', `Row ${rIdx + 1} circle ${cIdx + 1}`);
-          btn.addEventListener('click', () => {
-            pushHistory();
-            state[rIdx][cIdx] = !state[rIdx][cIdx];
-            setMoves(moves + 1);
-            render();
-          });
-          circles.appendChild(btn);
-        });
-
-        rowEl.appendChild(label);
-        rowEl.appendChild(circles);
-        boardEl.appendChild(rowEl);
+      row.forEach((filled, c) => {
+        const circle = document.createElement("div");
+        circle.className = "circle" + (filled ? " filled" : "");
+        circle.onclick = () => {
+          history.push(copyState());
+          state[r][c] = !state[r][c];
+          render();
+        };
+        rowDiv.appendChild(circle);
       });
+
+      board.appendChild(rowDiv);
+    });
+  }
+
+  undoBtn.onclick = () => {
+    if (history.length) {
+      state = history.pop();
+      render();
     }
+  };
 
-    undoBtn.addEventListener('click', () => {
-      if (!history.length) return;
-      const last = history.pop();
-      state = last.state;
-      setMoves(last.moves);
-      render();
-      updateButtons();
-    });
+  clearBtn.onclick = () => {
+    history.push(copyState());
+    state = state.map(row => row.map(() => false));
+    render();
+  };
 
-    clearBtn.addEventListener('click', () => {
-      pushHistory();
-      state = state.map(row => row.map(() => false));
-      setMoves(moves + 1);
-      render();
-    });
+  restartBtn.onclick = init;
 
-    restartBtn.addEventListener('click', init);
+  init();
+</script>
 
-    init();
-  </script>
 </body>
 </html>
