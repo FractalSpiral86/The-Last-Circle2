@@ -16,22 +16,69 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
+    padding: 24px;
   }
 
+  /* Whole app */
   .container {
     display: flex;
     flex-direction: column;
     align-items: center;
   }
 
-  /* BIGGER, LONGER TITLE */
+  /* Title */
   h1 {
-    margin-bottom: 28px;
+    margin: 0 0 28px 0;
     font-size: 42px;
     font-weight: bold;
     letter-spacing: 2px;
     text-align: center;
-    white-space: nowrap; /* keep on one line */
+    white-space: nowrap;
+    color: #fff; /* title stays white */
+  }
+
+  /* 3-column layout: Rules | Game | Tally */
+  .main {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+  }
+
+  /* Panels */
+  .panel {
+    border: 2px solid #39ff14;   /* lime */
+    background: #0b0b0b;
+    padding: 18px;
+    border-radius: 6px;
+  }
+
+  /* Rules panel */
+  .rules {
+    width: 320px;
+  }
+
+  .rules h2, .tally h2 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    letter-spacing: 1px;
+    color: #fff;
+  }
+
+  .rules ul {
+    margin: 0;
+    padding-left: 18px;
+    line-height: 1.55;
+    color: #ddd;
+    font-size: 14px;
+  }
+
+  .rules li { margin-bottom: 10px; }
+
+  /* Game area */
+  .game {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
   .board {
@@ -39,7 +86,7 @@
     flex-direction: column;
     gap: 22px;
     margin-bottom: 32px;
-    align-items: flex-start;
+    align-items: flex-start; /* rows left-aligned */
   }
 
   .row {
@@ -47,12 +94,12 @@
     gap: 16px;
   }
 
-  /* LIME GREEN CIRCLES */
+  /* Circles */
   .circle {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    border: 3px solid #39ff14; /* lime green */
+    border: 3px solid #39ff14; /* lime outline */
     background: transparent;
     cursor: pointer;
   }
@@ -67,19 +114,88 @@
     justify-content: center;
   }
 
-  /* DARK GREEN BUTTONS */
+  /* Buttons */
   button {
     padding: 14px 22px;
     font-size: 16px;
     cursor: pointer;
-    background: #0f3d0f;       /* dark green */
+    background: #0f3d0f;        /* dark green */
     color: #fff;
-    border: 2px solid #39ff14; /* lime outline */
+    border: 2px solid #39ff14;  /* lime outline */
     border-radius: 4px;
   }
 
-  button:hover {
-    background: #145214;
+  button:hover { background: #145214; }
+
+  /* Tally panel */
+  .tally {
+    width: 260px;
+    text-align: center;
+  }
+
+  .scoreline {
+    display: flex;
+    justify-content: center;
+    gap: 14px;
+    margin: 8px 0 16px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #fff;
+  }
+
+  .scorebox {
+    border: 2px solid #39ff14;
+    padding: 10px 12px;
+    border-radius: 6px;
+    min-width: 90px;
+    background: #0f0f0f;
+  }
+
+  .scorebox span {
+    display: block;
+    font-size: 12px;
+    font-weight: normal;
+    color: #bbb;
+    margin-top: 6px;
+    letter-spacing: 1px;
+  }
+
+  .tally-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+  }
+
+  .small {
+    padding: 12px 16px;
+    font-size: 15px;
+  }
+
+  .reset {
+    background: #2a2a2a;
+    border-color: #39ff14;
+  }
+  .reset:hover { background: #3a3a3a; }
+
+  .hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #bbb;
+    line-height: 1.4;
+  }
+
+  /* Mobile: stack panels */
+  @media (max-width: 980px) {
+    .main {
+      flex-direction: column;
+      align-items: center;
+    }
+    .rules, .tally {
+      width: min(520px, 92vw);
+      text-align: left;
+    }
+    .tally { text-align: center; }
   }
 </style>
 </head>
@@ -87,20 +203,63 @@
 <body>
 
 <div class="container">
-
   <h1>THE LAST CIRCLE</h1>
 
-  <div id="board" class="board"></div>
+  <div class="main">
+    <!-- LEFT: RULES -->
+    <div class="panel rules">
+      <h2>RULES</h2>
+      <ul>
+        <li>Players take turns.</li>
+        <li>On your turn, choose <strong>one row</strong>.</li>
+        <li>Remove <strong>one or more</strong> circles from that row.</li>
+        <li>You may only play in <strong>one row per turn</strong>.</li>
+        <li>The player who takes the <strong>last circle loses</strong>.</li>
+      </ul>
+    </div>
 
-  <div class="controls">
-    <button id="undo">Undo</button>
-    <button id="clear">Clear</button>
-    <button id="restart">Restart</button>
+    <!-- CENTER: GAME -->
+    <div class="game">
+      <div id="board" class="board"></div>
+
+      <div class="controls">
+        <button id="undo">Undo</button>
+        <button id="clear">Clear</button>
+        <button id="restart">Restart</button>
+      </div>
+    </div>
+
+    <!-- RIGHT: HOST TALLY -->
+    <div class="panel tally">
+      <h2>HOST RECORD</h2>
+
+      <div class="scoreline">
+        <div class="scorebox">
+          <div id="wins">0</div>
+          <span>WINS</span>
+        </div>
+        <div class="scorebox">
+          <div id="losses">0</div>
+          <span>LOSSES</span>
+        </div>
+      </div>
+
+      <div class="tally-buttons">
+        <button id="winBtn" class="small">+ Win</button>
+        <button id="lossBtn" class="small">+ Loss</button>
+        <button id="resetRecordBtn" class="small reset">Reset Record</button>
+      </div>
+
+      <div class="hint">
+        This record saves on this device/browser.<br>
+        (Refresh-safe.)
+      </div>
+    </div>
   </div>
-
 </div>
 
 <script>
+  // -------- GAME BOARD --------
   const ROWS = [3, 4, 5, 6];
 
   let state = [];
@@ -115,7 +274,7 @@
     return state.map(row => [...row]);
   }
 
-  function init() {
+  function initBoard() {
     state = ROWS.map(n => Array(n).fill(false));
     history = [];
     render();
@@ -156,9 +315,63 @@
     render();
   };
 
-  restartBtn.onclick = init;
+  restartBtn.onclick = initBoard;
 
-  init();
+  // -------- HOST RECORD (SAVED) --------
+  const winsEl = document.getElementById("wins");
+  const lossesEl = document.getElementById("losses");
+  const winBtn = document.getElementById("winBtn");
+  const lossBtn = document.getElementById("lossBtn");
+  const resetRecordBtn = document.getElementById("resetRecordBtn");
+
+  const STORAGE_KEY = "last_circle_host_record";
+
+  function loadRecord() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return { wins: 0, losses: 0 };
+      const data = JSON.parse(raw);
+      return {
+        wins: Number(data.wins) || 0,
+        losses: Number(data.losses) || 0
+      };
+    } catch {
+      return { wins: 0, losses: 0 };
+    }
+  }
+
+  function saveRecord(rec) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(rec));
+  }
+
+  function renderRecord(rec) {
+    winsEl.textContent = rec.wins;
+    lossesEl.textContent = rec.losses;
+  }
+
+  let record = loadRecord();
+  renderRecord(record);
+
+  winBtn.onclick = () => {
+    record.wins += 1;
+    saveRecord(record);
+    renderRecord(record);
+  };
+
+  lossBtn.onclick = () => {
+    record.losses += 1;
+    saveRecord(record);
+    renderRecord(record);
+  };
+
+  resetRecordBtn.onclick = () => {
+    record = { wins: 0, losses: 0 };
+    saveRecord(record);
+    renderRecord(record);
+  };
+
+  // Start
+  initBoard();
 </script>
 
 </body>
