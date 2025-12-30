@@ -12,10 +12,18 @@
     background: #111;
     color: #fff;
     font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;   /* CENTER HORIZONTALLY */
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;         /* keeps it centered and readable */
   }
 
   h1 {
-    margin-bottom: 16px;
+    text-align: center;
+    margin-bottom: 20px;
   }
 
   .board {
@@ -23,6 +31,7 @@
     flex-direction: column;
     gap: 16px;
     margin-bottom: 20px;
+    align-items: flex-start;  /* rows stay left-aligned */
   }
 
   .row {
@@ -45,6 +54,7 @@
 
   .controls {
     display: flex;
+    justify-content: center;  /* buttons centered */
     gap: 10px;
   }
 
@@ -58,14 +68,18 @@
 
 <body>
 
-<h1>The Last Circle</h1>
+<div class="container">
 
-<div id="board" class="board"></div>
+  <h1>The Last Circle</h1>
 
-<div class="controls">
-  <button id="undo">Undo</button>
-  <button id="clear">Clear</button>
-  <button id="restart">Restart</button>
+  <div id="board" class="board"></div>
+
+  <div class="controls">
+    <button id="undo">Undo</button>
+    <button id="clear">Clear</button>
+    <button id="restart">Restart</button>
+  </div>
+
 </div>
 
 <script>
