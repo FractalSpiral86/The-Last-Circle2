@@ -19,7 +19,6 @@
     padding: 24px;
   }
 
-  /* Whole app */
   .container {
     display: flex;
     flex-direction: column;
@@ -34,30 +33,31 @@
     letter-spacing: 2px;
     text-align: center;
     white-space: nowrap;
-    color: #fff; /* title stays white */
+    color: #fff;
   }
 
-  /* 3-column layout: Rules | Game | Tally */
+  /* 3-column layout */
   .main {
     display: flex;
     align-items: flex-start;
     gap: 28px;
   }
 
-  /* Panels */
+  /* Generic panel */
   .panel {
-    border: 2px solid #39ff14;   /* lime */
     background: #0b0b0b;
     padding: 18px;
     border-radius: 6px;
   }
 
-  /* Rules panel */
+  /* RULES PANEL (RED) */
   .rules {
     width: 320px;
+    border: 2px solid #ff2e2e; /* RED */
   }
 
-  .rules h2, .tally h2 {
+  .rules h2,
+  .tally h2 {
     margin: 0 0 12px 0;
     font-size: 18px;
     letter-spacing: 1px;
@@ -72,9 +72,11 @@
     font-size: 14px;
   }
 
-  .rules li { margin-bottom: 10px; }
+  .rules li {
+    margin-bottom: 10px;
+  }
 
-  /* Game area */
+  /* GAME */
   .game {
     display: flex;
     flex-direction: column;
@@ -86,7 +88,7 @@
     flex-direction: column;
     gap: 22px;
     margin-bottom: 32px;
-    align-items: flex-start; /* rows left-aligned */
+    align-items: flex-start;
   }
 
   .row {
@@ -94,12 +96,12 @@
     gap: 16px;
   }
 
-  /* Circles */
+  /* Circles (still lime green) */
   .circle {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    border: 3px solid #39ff14; /* lime outline */
+    border: 3px solid #39ff14;
     background: transparent;
     cursor: pointer;
   }
@@ -114,23 +116,25 @@
     justify-content: center;
   }
 
-  /* Buttons */
   button {
     padding: 14px 22px;
     font-size: 16px;
     cursor: pointer;
-    background: #0f3d0f;        /* dark green */
+    background: #0f3d0f;
     color: #fff;
-    border: 2px solid #39ff14;  /* lime outline */
+    border: 2px solid #39ff14;
     border-radius: 4px;
   }
 
-  button:hover { background: #145214; }
+  button:hover {
+    background: #145214;
+  }
 
-  /* Tally panel */
+  /* HOST RECORD (RED) */
   .tally {
     width: 260px;
     text-align: center;
+    border: 2px solid #ff2e2e; /* RED */
   }
 
   .scoreline {
@@ -140,11 +144,10 @@
     margin: 8px 0 16px;
     font-size: 20px;
     font-weight: bold;
-    color: #fff;
   }
 
   .scorebox {
-    border: 2px solid #39ff14;
+    border: 2px solid #ff2e2e; /* RED */
     padding: 10px 12px;
     border-radius: 6px;
     min-width: 90px;
@@ -174,9 +177,12 @@
 
   .reset {
     background: #2a2a2a;
-    border-color: #39ff14;
+    border-color: #ff2e2e;
   }
-  .reset:hover { background: #3a3a3a; }
+
+  .reset:hover {
+    background: #3a3a3a;
+  }
 
   .hint {
     margin-top: 12px;
@@ -185,17 +191,22 @@
     line-height: 1.4;
   }
 
-  /* Mobile: stack panels */
+  /* Mobile stacking */
   @media (max-width: 980px) {
     .main {
       flex-direction: column;
       align-items: center;
     }
-    .rules, .tally {
+
+    .rules,
+    .tally {
       width: min(520px, 92vw);
       text-align: left;
     }
-    .tally { text-align: center; }
+
+    .tally {
+      text-align: center;
+    }
   }
 </style>
 </head>
@@ -206,19 +217,19 @@
   <h1>THE LAST CIRCLE</h1>
 
   <div class="main">
-    <!-- LEFT: RULES -->
+    <!-- RULES -->
     <div class="panel rules">
       <h2>RULES</h2>
       <ul>
         <li>Players take turns.</li>
-        <li>On your turn, choose <strong>one row</strong>.</li>
+        <li>Choose <strong>one row</strong> per turn.</li>
         <li>Remove <strong>one or more</strong> circles from that row.</li>
         <li>You may only play in <strong>one row per turn</strong>.</li>
         <li>The player who takes the <strong>last circle loses</strong>.</li>
       </ul>
     </div>
 
-    <!-- CENTER: GAME -->
+    <!-- GAME -->
     <div class="game">
       <div id="board" class="board"></div>
 
@@ -229,7 +240,7 @@
       </div>
     </div>
 
-    <!-- RIGHT: HOST TALLY -->
+    <!-- HOST RECORD -->
     <div class="panel tally">
       <h2>HOST RECORD</h2>
 
@@ -251,17 +262,15 @@
       </div>
 
       <div class="hint">
-        This record saves on this device/browser.<br>
-        (Refresh-safe.)
+        Record is saved locally on this device.
       </div>
     </div>
   </div>
 </div>
 
 <script>
-  // -------- GAME BOARD --------
+  /* -------- GAME BOARD -------- */
   const ROWS = [3, 4, 5, 6];
-
   let state = [];
   let history = [];
 
@@ -282,7 +291,6 @@
 
   function render() {
     board.innerHTML = "";
-
     state.forEach((row, r) => {
       const rowDiv = document.createElement("div");
       rowDiv.className = "row";
@@ -317,24 +325,14 @@
 
   restartBtn.onclick = initBoard;
 
-  // -------- HOST RECORD (SAVED) --------
+  /* -------- HOST RECORD -------- */
+  const STORAGE_KEY = "last_circle_host_record";
   const winsEl = document.getElementById("wins");
   const lossesEl = document.getElementById("losses");
-  const winBtn = document.getElementById("winBtn");
-  const lossBtn = document.getElementById("lossBtn");
-  const resetRecordBtn = document.getElementById("resetRecordBtn");
-
-  const STORAGE_KEY = "last_circle_host_record";
 
   function loadRecord() {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return { wins: 0, losses: 0 };
-      const data = JSON.parse(raw);
-      return {
-        wins: Number(data.wins) || 0,
-        losses: Number(data.losses) || 0
-      };
+      return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { wins: 0, losses: 0 };
     } catch {
       return { wins: 0, losses: 0 };
     }
@@ -344,33 +342,29 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(rec));
   }
 
-  function renderRecord(rec) {
-    winsEl.textContent = rec.wins;
-    lossesEl.textContent = rec.losses;
-  }
-
   let record = loadRecord();
-  renderRecord(record);
+  winsEl.textContent = record.wins;
+  lossesEl.textContent = record.losses;
 
-  winBtn.onclick = () => {
-    record.wins += 1;
+  document.getElementById("winBtn").onclick = () => {
+    record.wins++;
     saveRecord(record);
-    renderRecord(record);
+    winsEl.textContent = record.wins;
   };
 
-  lossBtn.onclick = () => {
-    record.losses += 1;
+  document.getElementById("lossBtn").onclick = () => {
+    record.losses++;
     saveRecord(record);
-    renderRecord(record);
+    lossesEl.textContent = record.losses;
   };
 
-  resetRecordBtn.onclick = () => {
+  document.getElementById("resetRecordBtn").onclick = () => {
     record = { wins: 0, losses: 0 };
     saveRecord(record);
-    renderRecord(record);
+    winsEl.textContent = 0;
+    lossesEl.textContent = 0;
   };
 
-  // Start
   initBoard();
 </script>
 
