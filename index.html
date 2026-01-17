@@ -7,11 +7,9 @@
   <style>
     :root{
       --bg:#050505;
-      --panel:#0b0b0b;
       --text:#eaeaea;
       --muted:#b9b9b9;
       --lime:#39ff14;
-      --limeGlow: rgba(57,255,20,.35);
       --border: rgba(57,255,20,.22);
       --shadow: 0 12px 32px rgba(0,0,0,.55);
       --radius:18px;
@@ -22,8 +20,8 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
       color:var(--text);
       background:
-        radial-gradient(900px 500px at 22% 25%, rgba(57,255,20,.10), transparent 55%),
-        radial-gradient(800px 500px at 75% 70%, rgba(57,255,20,.06), transparent 55%),
+        radial-gradient(900px 520px at 25% 20%, rgba(57,255,20,.10), transparent 55%),
+        radial-gradient(900px 520px at 75% 80%, rgba(57,255,20,.06), transparent 55%),
         var(--bg);
       min-height:100vh;
       display:flex;
@@ -40,34 +38,51 @@
       border-radius: var(--radius);
       box-shadow: var(--shadow);
       padding:16px;
-      display:grid;
-      grid-template-columns: 290px 1fr;
-      gap:16px;
+      display:flex;
+      flex-direction:column;
+      gap:14px;
     }
 
-    /* LEFT: CIRCLES */
-    .left{
+    /* Shared panel */
+    .panel{
       border:1px solid var(--border);
       border-radius: 16px;
       background: rgba(0,0,0,.22);
       padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:12px;
     }
 
-    .leftHeader{
+    /* RULES (TOP) */
+    .rules h2{
+      margin:0 0 8px 0;
+      font-size:15px;
+      letter-spacing:.12em;
+      text-transform:uppercase;
+      color: rgba(57,255,20,.92);
+    }
+    .rules ol{
+      margin:0;
+      padding-left:18px;
+      color: rgba(234,234,234,.92);
+      line-height:1.35;
+      font-size:13.5px;
+    }
+    .rules li{ margin:4px 0; }
+    .rules .muted{ color: rgba(234,234,234,.70); }
+
+    /* GAME BOARD (MIDDLE) */
+    .boardHeader{
       display:flex;
       align-items:baseline;
       justify-content:space-between;
       gap:10px;
+      margin-bottom:10px;
     }
-
-    .leftTitle{
+    .boardTitle{
+      margin:0;
       font-weight:900;
       letter-spacing:.14em;
       text-transform:uppercase;
-      font-size:12px;
+      font-size:13px;
       color: rgba(57,255,20,.92);
     }
 
@@ -91,107 +106,57 @@
     .circleGrid{
       display:flex;
       flex-direction:column;
-      gap:10px;
-      align-items:flex-start; /* keep aligned on the left */
+      gap:12px;
+      align-items:flex-start; /* aligned on the left inside the board */
     }
-
     .circleRow{
       display:flex;
-      gap:10px;
+      gap:12px;
       justify-content:flex-start;
       align-items:center;
       flex-wrap:nowrap;
     }
 
     .circle{
-      width:50px;
-      height:50px;
+      width:54px;
+      height:54px;
       border-radius:50%;
-      background: rgba(0,0,0,.15);
-      border:2px solid rgba(57,255,20,.95); /* hollow lime green */
+      background: transparent;                 /* hollow */
+      border:2px solid rgba(57,255,20,.95);    /* lime outline */
       box-shadow: 0 0 0 2px rgba(57,255,20,.10) inset, 0 0 18px rgba(57,255,20,.14);
       cursor:pointer;
-      position:relative;
       transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
       user-select:none;
+      position:relative;
     }
     .circle:hover{ transform: translateY(-1px); }
 
-    /* When "selected", keep it hollow but add stronger glow */
+    /* Selected: still hollow, just stronger glow */
     .circle.on{
-      background: rgba(57,255,20,.06);
+      background: rgba(57,255,20,.04);
       box-shadow:
         0 0 0 2px rgba(57,255,20,.18) inset,
-        0 0 26px rgba(57,255,20,.35);
+        0 0 28px rgba(57,255,20,.38);
     }
 
-    .circle .num{
+    /* (No numbers) */
+    .circle::after{
+      content:"";
       position:absolute;
       inset:0;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:15px;
-      color: rgba(234,234,234,.92);
-      text-shadow: 0 0 10px rgba(0,0,0,.8);
-      pointer-events:none;
     }
 
-    .leftNote{
-      margin-top:2px;
+    .boardNote{
+      margin-top:10px;
       font-size:12px;
       color: rgba(234,234,234,.68);
       line-height:1.3;
     }
-    .leftNote b{ color: rgba(57,255,20,.9); }
+    .boardNote b{ color: rgba(57,255,20,.9); }
 
-    /* RIGHT: RULES (TOP) + RECORD (BOTTOM) */
-    .right{
-      display:flex;
-      flex-direction:column;
-      gap:14px;
-      min-height: 420px;
-    }
-
-    .rules{
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(0,0,0,.22);
-      padding:14px 14px 12px;
-    }
-    .rules h2{
-      margin:0 0 8px 0;
-      font-size:15px;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color: rgba(57,255,20,.92);
-    }
-    .rules ol{
-      margin:0;
-      padding-left:18px;
-      color: rgba(234,234,234,.92);
-      line-height:1.35;
-      font-size:13.5px;
-    }
-    .rules li{ margin:4px 0; }
-    .rules .muted{ color: rgba(234,234,234,.70); }
-
-    .spacer{
-      flex:1; /* pushes host record to the bottom */
-    }
-
-    .record{
-      border:1px solid var(--border);
-      border-radius: 16px;
-      background: rgba(0,0,0,.22);
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
+    /* HOST RECORD (BOTTOM) */
     .record h2{
-      margin:0;
+      margin:0 0 10px 0;
       font-size:14px;
       letter-spacing:.12em;
       text-transform:uppercase;
@@ -206,6 +171,7 @@
       border-radius: 14px;
       border:1px solid rgba(57,255,20,.18);
       background: rgba(57,255,20,.06);
+      margin-bottom:10px;
     }
 
     .stat .label{
@@ -224,6 +190,7 @@
       display:grid;
       grid-template-columns: 1fr 1fr;
       gap:10px;
+      margin-bottom:10px;
     }
 
     button.action{
@@ -256,15 +223,11 @@
     }
     .btnLime:hover,.btnGhost:hover,.btnDanger:hover{ filter:brightness(1.06); }
 
-    /* Mobile */
-    @media (max-width: 880px){
-      .app{ grid-template-columns: 1fr; }
-      .right{ min-height: unset; }
-      .spacer{ display:none; }
-      .record{ order:3; }
-    }
-    @media (max-width: 420px){
-      .circle{ width:46px; height:46px; }
+    /* Responsive */
+    @media (max-width: 520px){
+      .circle{ width:48px; height:48px; }
+      .circleRow{ gap:10px; }
+      .circleGrid{ gap:10px; }
     }
   </style>
 </head>
@@ -272,73 +235,67 @@
 
   <div class="app">
 
-    <!-- LEFT SIDE: 4 rows of circles aligned to left -->
-    <section class="left">
-      <div class="leftHeader">
-        <div class="leftTitle">Circles</div>
+    <!-- TOP: RULES -->
+    <section class="panel rules">
+      <h2>Rules</h2>
+      <ol>
+        <li>Tap circles as they’re claimed.</li>
+        <li>Players take turns choosing a circle.</li>
+        <li>The final remaining one is <b>THE LAST CIRCLE</b>.</li>
+        <li class="muted">Track host wins/losses below.</li>
+      </ol>
+    </section>
+
+    <!-- MIDDLE: GAME BOARD (CIRCLES) -->
+    <section class="panel">
+      <div class="boardHeader">
+        <div class="boardTitle">Game Board</div>
         <button class="resetSmall" id="resetCirclesBtn">Reset</button>
       </div>
 
       <div class="circleGrid" id="circleGrid"></div>
 
-      <div class="leftNote">
-        Tap to toggle. Circles are saved automatically.
+      <div class="boardNote">
+        Tap to toggle. Circles save automatically in your browser.
       </div>
     </section>
 
-    <!-- RIGHT SIDE: Rules on top, record on bottom -->
-    <section class="right">
-      <div class="rules">
-        <h2>Rules</h2>
-        <ol>
-          <li>Tap circles as they’re claimed.</li>
-          <li>Players take turns choosing a circle.</li>
-          <li>The final remaining one is <b>THE LAST CIRCLE</b>.</li>
-          <li class="muted">Track host wins/losses below.</li>
-        </ol>
+    <!-- BOTTOM: HOST RECORD -->
+    <section class="panel record">
+      <h2>Host Record</h2>
+
+      <div class="wl">
+        <div class="stat">
+          <div class="label">Wins</div>
+          <div class="value" id="winsValue">0</div>
+        </div>
+        <div class="stat" style="text-align:right;">
+          <div class="label">Losses</div>
+          <div class="value" id="lossesValue">0</div>
+        </div>
       </div>
 
-      <div class="spacer"></div>
-
-      <div class="record">
-        <h2>Host Record</h2>
-
-        <div class="wl">
-          <div class="stat">
-            <div class="label">Wins</div>
-            <div class="value" id="winsValue">0</div>
-          </div>
-          <div class="stat" style="text-align:right;">
-            <div class="label">Losses</div>
-            <div class="value" id="lossesValue">0</div>
-          </div>
-        </div>
-
-        <div class="btnRow">
-          <button class="action btnLime" id="addWinBtn">+ Win</button>
-          <button class="action btnGhost" id="removeWinBtn">- Win</button>
-          <button class="action btnLime" id="addLossBtn">+ Loss</button>
-          <button class="action btnGhost" id="removeLossBtn">- Loss</button>
-        </div>
-
-        <button class="action btnDanger" id="resetRecordBtn">Reset Record</button>
+      <div class="btnRow">
+        <button class="action btnLime" id="addWinBtn">+ Win</button>
+        <button class="action btnGhost" id="removeWinBtn">- Win</button>
+        <button class="action btnLime" id="addLossBtn">+ Loss</button>
+        <button class="action btnGhost" id="removeLossBtn">- Loss</button>
       </div>
+
+      <button class="action btnDanger" id="resetRecordBtn">Reset Record</button>
     </section>
 
   </div>
 
   <script>
-    /***********************
-     * CIRCLE LAYOUT (exactly as requested):
-     * Row 1: 3 circles
-     * Row 2: 4 circles
-     * Row 3: 5 circles
-     * Row 4: 6 circles
-     ***********************/
+    // Layout requested:
+    // Row 1: 3 circles
+    // Row 2: 4 circles
+    // Row 3: 5 circles
+    // Row 4: 6 circles
     const ROWS = [3,4,5,6];
     const TOTAL = ROWS.reduce((a,b)=>a+b, 0); // 18 circles
-
-    const LS_KEY = "last_circle_left_rows_v1";
+    const LS_KEY = "last_circle_vertical_layout_v2";
 
     const defaultState = () => ({
       circles: Array(TOTAL).fill(false),
@@ -392,19 +349,17 @@
       circleGridEl.innerHTML = "";
       let idx = 0;
 
-      ROWS.forEach((count, rowNum) => {
+      ROWS.forEach((count) => {
         const row = document.createElement("div");
         row.className = "circleRow";
-        row.setAttribute("aria-label", `Row ${rowNum+1}`);
 
         for(let j=0; j<count; j++){
-          const i = idx; // capture
+          const i = idx;
           const c = document.createElement("div");
           c.className = "circle" + (state.circles[i] ? " on" : "");
           c.setAttribute("role","button");
           c.setAttribute("tabindex","0");
           c.title = "Toggle circle " + (i+1);
-          c.innerHTML = `<div class="num">${i+1}</div>`;
 
           c.addEventListener("click", () => toggleCircle(i));
           c.addEventListener("keydown", (e) => {
