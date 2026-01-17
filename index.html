@@ -6,149 +6,186 @@
   <title>The Last Circle</title>
   <style>
     :root{
-      --bg:#060606;
-      --panel:#0c0c0c;
+      --bg:#050505;
+      --panel:#0b0b0b;
       --text:#eaeaea;
-      --muted:#a9a9a9;
+      --muted:#b9b9b9;
       --lime:#39ff14;
-      --lime2:#1bd10a;
-      --danger:#ff3b3b;
-      --shadow: 0 10px 30px rgba(0,0,0,.45);
+      --limeGlow: rgba(57,255,20,.35);
+      --border: rgba(57,255,20,.22);
+      --shadow: 0 12px 32px rgba(0,0,0,.55);
       --radius:18px;
     }
-
     *{ box-sizing:border-box; }
     body{
       margin:0;
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-      background: radial-gradient(1200px 600px at 30% 20%, rgba(57,255,20,.08), transparent 55%),
-                  radial-gradient(900px 500px at 75% 65%, rgba(57,255,20,.05), transparent 55%),
-                  var(--bg);
       color:var(--text);
-    }
-
-    .wrap{
+      background:
+        radial-gradient(900px 500px at 22% 25%, rgba(57,255,20,.10), transparent 55%),
+        radial-gradient(800px 500px at 75% 70%, rgba(57,255,20,.06), transparent 55%),
+        var(--bg);
       min-height:100vh;
-      padding:18px;
       display:flex;
-      justify-content:center;
       align-items:center;
+      justify-content:center;
+      padding:18px;
     }
 
     .app{
       width:min(1100px, 100%);
+      background: linear-gradient(180deg, rgba(57,255,20,.06), rgba(0,0,0,0)),
+                  rgba(10,10,10,.92);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding:16px;
       display:grid;
-      grid-template-columns: 110px 1fr;
+      grid-template-columns: 290px 1fr;
       gap:16px;
     }
 
-    /* Left circle rail */
-    .rail{
-      background: linear-gradient(180deg, rgba(57,255,20,.08), rgba(0,0,0,0)),
-                  var(--panel);
-      border:1px solid rgba(57,255,20,.22);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:14px 10px;
+    /* LEFT: CIRCLES */
+    .left{
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,.22);
+      padding:14px;
       display:flex;
       flex-direction:column;
-      align-items:center;
       gap:12px;
     }
 
-    .railTitle{
-      font-weight:700;
-      letter-spacing:.12em;
-      font-size:11px;
-      color:rgba(57,255,20,.85);
+    .leftHeader{
+      display:flex;
+      align-items:baseline;
+      justify-content:space-between;
+      gap:10px;
+    }
+
+    .leftTitle{
+      font-weight:900;
+      letter-spacing:.14em;
       text-transform:uppercase;
-      margin-top:2px;
-      margin-bottom:2px;
-      text-align:center;
+      font-size:12px;
+      color: rgba(57,255,20,.92);
+    }
+
+    .resetSmall{
+      border:none;
+      border-radius: 12px;
+      padding:8px 10px;
+      cursor:pointer;
+      font-weight:900;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+      background: rgba(255,59,59,.12);
+      border:1px solid rgba(255,59,59,.35);
+      color: rgba(255,200,200,.95);
+      transition: filter .15s ease, transform .06s ease;
+      user-select:none;
+    }
+    .resetSmall:hover{ filter:brightness(1.05); }
+    .resetSmall:active{ transform: scale(.99); }
+
+    .circleGrid{
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      align-items:flex-start; /* keep aligned on the left */
+    }
+
+    .circleRow{
+      display:flex;
+      gap:10px;
+      justify-content:flex-start;
+      align-items:center;
+      flex-wrap:nowrap;
     }
 
     .circle{
-      width:64px;
-      height:64px;
+      width:50px;
+      height:50px;
       border-radius:50%;
-      border:2px solid rgba(57,255,20,.95);
-      box-shadow:
-        0 0 0 2px rgba(57,255,20,.12) inset,
-        0 0 18px rgba(57,255,20,.18);
-      background: rgba(0,0,0,.25);
+      background: rgba(0,0,0,.15);
+      border:2px solid rgba(57,255,20,.95); /* hollow lime green */
+      box-shadow: 0 0 0 2px rgba(57,255,20,.10) inset, 0 0 18px rgba(57,255,20,.14);
       cursor:pointer;
-      transition: transform .08s ease, background .15s ease, box-shadow .15s ease;
       position:relative;
+      transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
+      user-select:none;
     }
-    .circle:hover{ transform: scale(1.02); }
-    .circle.filled{
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.10), rgba(57,255,20,.22) 38%, rgba(57,255,20,.10) 70%, rgba(0,0,0,.35));
+    .circle:hover{ transform: translateY(-1px); }
+
+    /* When "selected", keep it hollow but add stronger glow */
+    .circle.on{
+      background: rgba(57,255,20,.06);
       box-shadow:
         0 0 0 2px rgba(57,255,20,.18) inset,
-        0 0 26px rgba(57,255,20,.30);
+        0 0 26px rgba(57,255,20,.35);
     }
+
     .circle .num{
       position:absolute;
       inset:0;
       display:flex;
       align-items:center;
       justify-content:center;
-      font-weight:800;
-      color:rgba(234,234,234,.9);
+      font-weight:900;
+      font-size:15px;
+      color: rgba(234,234,234,.92);
       text-shadow: 0 0 10px rgba(0,0,0,.8);
-      font-size:18px;
-      user-select:none;
+      pointer-events:none;
     }
 
-    /* Main panel */
-    .main{
-      background: linear-gradient(180deg, rgba(57,255,20,.06), rgba(0,0,0,0)),
-                  rgba(10,10,10,.92);
-      border:1px solid rgba(57,255,20,.18);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding:16px;
+    .leftNote{
+      margin-top:2px;
+      font-size:12px;
+      color: rgba(234,234,234,.68);
+      line-height:1.3;
+    }
+    .leftNote b{ color: rgba(57,255,20,.9); }
+
+    /* RIGHT: RULES (TOP) + RECORD (BOTTOM) */
+    .right{
       display:flex;
       flex-direction:column;
       gap:14px;
-    }
-
-    .topbar{
-      display:grid;
-      grid-template-columns: 1fr auto;
-      gap:14px;
-      align-items:start;
+      min-height: 420px;
     }
 
     .rules{
-      border:1px solid rgba(57,255,20,.18);
-      border-radius: 14px;
-      padding:12px 14px;
-      background: rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,.22);
+      padding:14px 14px 12px;
     }
     .rules h2{
       margin:0 0 8px 0;
-      font-size:16px;
-      letter-spacing:.08em;
+      font-size:15px;
+      letter-spacing:.12em;
       text-transform:uppercase;
-      color:rgba(57,255,20,.9);
+      color: rgba(57,255,20,.92);
     }
     .rules ol{
       margin:0;
       padding-left:18px;
-      color:rgba(234,234,234,.92);
+      color: rgba(234,234,234,.92);
       line-height:1.35;
       font-size:13.5px;
     }
     .rules li{ margin:4px 0; }
-    .rules .muted{ color:rgba(234,234,234,.68); }
+    .rules .muted{ color: rgba(234,234,234,.70); }
+
+    .spacer{
+      flex:1; /* pushes host record to the bottom */
+    }
 
     .record{
-      min-width: 260px;
-      border:1px solid rgba(57,255,20,.18);
-      border-radius: 14px;
-      padding:12px 14px;
-      background: rgba(0,0,0,.25);
+      border:1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(0,0,0,.22);
+      padding:14px;
       display:flex;
       flex-direction:column;
       gap:10px;
@@ -156,25 +193,31 @@
     .record h2{
       margin:0;
       font-size:14px;
-      letter-spacing:.10em;
+      letter-spacing:.12em;
       text-transform:uppercase;
-      color:rgba(57,255,20,.9);
+      color: rgba(57,255,20,.92);
     }
+
     .wl{
       display:flex;
       justify-content:space-between;
-      align-items:center;
+      gap:12px;
       padding:10px 12px;
-      border-radius: 12px;
-      background: rgba(57,255,20,.06);
+      border-radius: 14px;
       border:1px solid rgba(57,255,20,.18);
+      background: rgba(57,255,20,.06);
     }
-    .wl .label{ color:rgba(234,234,234,.75); font-size:12px; }
-    .wl .value{
-      font-size:22px;
+
+    .stat .label{
+      font-size:12px;
+      color: rgba(234,234,234,.70);
+    }
+    .stat .value{
+      font-size:24px;
       font-weight:900;
       letter-spacing:.04em;
-      color:rgba(234,234,234,.95);
+      color: rgba(234,234,234,.96);
+      margin-top:2px;
     }
 
     .btnRow{
@@ -183,240 +226,145 @@
       gap:10px;
     }
 
-    button{
+    button.action{
       border:none;
-      border-radius: 12px;
-      padding:10px 10px;
-      font-weight:800;
-      letter-spacing:.06em;
+      border-radius: 14px;
+      padding:11px 10px;
+      font-weight:900;
+      letter-spacing:.08em;
       text-transform:uppercase;
       cursor:pointer;
-      transition: transform .06s ease, filter .15s ease, opacity .15s ease;
       user-select:none;
+      transition: filter .15s ease, transform .06s ease;
     }
-    button:active{ transform: scale(.99); }
+    button.action:active{ transform: scale(.99); }
 
     .btnLime{
       background: rgba(57,255,20,.14);
       color: rgba(57,255,20,.95);
-      border:1px solid rgba(57,255,20,.45);
+      border:1px solid rgba(57,255,20,.40);
     }
-    .btnLime:hover{ filter:brightness(1.1); }
-
     .btnGhost{
       background: rgba(255,255,255,.06);
-      color: rgba(234,234,234,.9);
+      color: rgba(234,234,234,.92);
       border:1px solid rgba(255,255,255,.12);
     }
-    .btnGhost:hover{ filter:brightness(1.06); }
-
     .btnDanger{
       background: rgba(255,59,59,.12);
-      color: rgba(255,160,160,.98);
-      border:1px solid rgba(255,59,59,.38);
+      color: rgba(255,205,205,.95);
+      border:1px solid rgba(255,59,59,.35);
     }
-    .btnDanger:hover{ filter:brightness(1.05); }
+    .btnLime:hover,.btnGhost:hover,.btnDanger:hover{ filter:brightness(1.06); }
 
-    /* Center game area */
-    .board{
-      border:1px solid rgba(57,255,20,.14);
-      border-radius: 16px;
-      background: rgba(0,0,0,.22);
-      padding:14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
+    /* Mobile */
+    @media (max-width: 880px){
+      .app{ grid-template-columns: 1fr; }
+      .right{ min-height: unset; }
+      .spacer{ display:none; }
+      .record{ order:3; }
     }
-
-    .boardHeader{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-    }
-    .title{
-      font-size:18px;
-      font-weight:900;
-      letter-spacing:.12em;
-      text-transform:uppercase;
-      color:rgba(234,234,234,.92);
-    }
-    .status{
-      font-size:12px;
-      color:rgba(234,234,234,.70);
-      letter-spacing:.06em;
-      text-transform:uppercase;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap:10px;
-    }
-
-    .cell{
-      height:76px;
-      border-radius: 14px;
-      border:1px solid rgba(57,255,20,.18);
-      background: rgba(255,255,255,.03);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      cursor:pointer;
-      position:relative;
-      overflow:hidden;
-      transition: transform .06s ease, background .15s ease, border-color .15s ease;
-    }
-    .cell:hover{ transform: translateY(-1px); }
-    .cell.on{
-      background: radial-gradient(circle at 30% 30%, rgba(255,255,255,.08), rgba(57,255,20,.20), rgba(0,0,0,.35));
-      border-color: rgba(57,255,20,.55);
-    }
-    .cell .txt{
-      font-weight:900;
-      letter-spacing:.08em;
-      color:rgba(234,234,234,.92);
-      font-size:16px;
-      user-select:none;
-      text-shadow: 0 0 10px rgba(0,0,0,.8);
-    }
-
-    .footer{
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top:2px;
-    }
-    .note{
-      font-size:12px;
-      color:rgba(234,234,234,.65);
-      line-height:1.3;
-    }
-    .note b{ color:rgba(57,255,20,.9); }
-
-    /* Mobile tweaks */
-    @media (max-width: 820px){
-      .app{
-        grid-template-columns: 92px 1fr;
-      }
-      .record{ min-width:unset; }
-      .topbar{
-        grid-template-columns: 1fr;
-      }
-      .grid{ grid-template-columns: repeat(4, 1fr); }
-    }
-    @media (max-width: 520px){
-      .grid{ grid-template-columns: repeat(3, 1fr); }
-      .cell{ height:68px; }
-      .circle{ width:56px; height:56px; }
+    @media (max-width: 420px){
+      .circle{ width:46px; height:46px; }
     }
   </style>
 </head>
-
 <body>
-  <div class="wrap">
-    <div class="app">
 
-      <!-- LEFT RAIL -->
-      <aside class="rail" aria-label="Circle rail">
-        <div class="railTitle">Circles</div>
-        <div id="circleRail"></div>
-        <button class="btnDanger" id="resetCirclesBtn" style="width:100%; margin-top:6px;">Reset</button>
-      </aside>
+  <div class="app">
 
-      <!-- MAIN -->
-      <main class="main">
-        <section class="topbar">
-          <div class="rules">
-            <h2>Rules</h2>
-            <ol>
-              <li>Host taps circles on the left as they’re claimed.</li>
-              <li>Players take turns choosing a square.</li>
-              <li>Last available choice becomes <b>THE LAST CIRCLE</b>.</li>
-              <li class="muted">Host can track wins/losses live.</li>
-            </ol>
+    <!-- LEFT SIDE: 4 rows of circles aligned to left -->
+    <section class="left">
+      <div class="leftHeader">
+        <div class="leftTitle">Circles</div>
+        <button class="resetSmall" id="resetCirclesBtn">Reset</button>
+      </div>
+
+      <div class="circleGrid" id="circleGrid"></div>
+
+      <div class="leftNote">
+        Tap to toggle. Circles are saved automatically.
+      </div>
+    </section>
+
+    <!-- RIGHT SIDE: Rules on top, record on bottom -->
+    <section class="right">
+      <div class="rules">
+        <h2>Rules</h2>
+        <ol>
+          <li>Tap circles as they’re claimed.</li>
+          <li>Players take turns choosing a circle.</li>
+          <li>The final remaining one is <b>THE LAST CIRCLE</b>.</li>
+          <li class="muted">Track host wins/losses below.</li>
+        </ol>
+      </div>
+
+      <div class="spacer"></div>
+
+      <div class="record">
+        <h2>Host Record</h2>
+
+        <div class="wl">
+          <div class="stat">
+            <div class="label">Wins</div>
+            <div class="value" id="winsValue">0</div>
           </div>
-
-          <div class="record">
-            <h2>Host Record</h2>
-
-            <div class="wl">
-              <div>
-                <div class="label">Wins</div>
-                <div class="value" id="winsValue">0</div>
-              </div>
-              <div>
-                <div class="label">Losses</div>
-                <div class="value" id="lossesValue">0</div>
-              </div>
-            </div>
-
-            <div class="btnRow">
-              <button class="btnLime" id="addWinBtn">+ Win</button>
-              <button class="btnGhost" id="removeWinBtn">- Win</button>
-              <button class="btnLime" id="addLossBtn">+ Loss</button>
-              <button class="btnGhost" id="removeLossBtn">- Loss</button>
-            </div>
-
-            <button class="btnDanger" id="resetRecordBtn" style="margin-top:2px;">Reset Record</button>
+          <div class="stat" style="text-align:right;">
+            <div class="label">Losses</div>
+            <div class="value" id="lossesValue">0</div>
           </div>
-        </section>
+        </div>
 
-        <section class="board">
-          <div class="boardHeader">
-            <div class="title">The Last Circle</div>
-            <div class="status" id="statusText">Tap squares to toggle</div>
-          </div>
+        <div class="btnRow">
+          <button class="action btnLime" id="addWinBtn">+ Win</button>
+          <button class="action btnGhost" id="removeWinBtn">- Win</button>
+          <button class="action btnLime" id="addLossBtn">+ Loss</button>
+          <button class="action btnGhost" id="removeLossBtn">- Loss</button>
+        </div>
 
-          <div class="grid" id="grid"></div>
+        <button class="action btnDanger" id="resetRecordBtn">Reset Record</button>
+      </div>
+    </section>
 
-          <div class="footer">
-            <div class="note">
-              Tip: Your host record and circles save automatically in your browser. Use <b>Reset</b> to clear.
-            </div>
-            <div style="display:flex; gap:10px; align-items:center;">
-              <button class="btnGhost" id="resetGridBtn">Reset Board</button>
-              <button class="btnDanger" id="hardResetBtn">Hard Reset All</button>
-            </div>
-          </div>
-        </section>
-      </main>
-
-    </div>
   </div>
 
   <script>
     /***********************
-     * CONFIG
+     * CIRCLE LAYOUT (exactly as requested):
+     * Row 1: 3 circles
+     * Row 2: 4 circles
+     * Row 3: 5 circles
+     * Row 4: 6 circles
      ***********************/
-    const CIRCLE_COUNT = 10;        // number of circles in the left rail
-    const GRID_COUNT = 20;          // number of squares in the center board
-    const LS_KEY = "last_circle_state_v3"; // localStorage key
+    const ROWS = [3,4,5,6];
+    const TOTAL = ROWS.reduce((a,b)=>a+b, 0); // 18 circles
 
-    /***********************
-     * STATE
-     ***********************/
+    const LS_KEY = "last_circle_left_rows_v1";
+
     const defaultState = () => ({
-      circles: Array(CIRCLE_COUNT).fill(false),
-      grid: Array(GRID_COUNT).fill(false),
+      circles: Array(TOTAL).fill(false),
       wins: 0,
       losses: 0
     });
+
+    function clampInt(n,min,max){
+      n = Math.trunc(n);
+      return Math.max(min, Math.min(max, n));
+    }
 
     function loadState(){
       try{
         const raw = localStorage.getItem(LS_KEY);
         if(!raw) return defaultState();
-        const parsed = JSON.parse(raw);
-
-        // Defensive shape
+        const p = JSON.parse(raw);
         const s = defaultState();
-        if(Array.isArray(parsed.circles)) s.circles = parsed.circles.slice(0, CIRCLE_COUNT).map(Boolean).concat(Array(Math.max(0, CIRCLE_COUNT - parsed.circles.length)).fill(false));
-        if(Array.isArray(parsed.grid)) s.grid = parsed.grid.slice(0, GRID_COUNT).map(Boolean).concat(Array(Math.max(0, GRID_COUNT - parsed.grid.length)).fill(false));
-        if(Number.isFinite(parsed.wins)) s.wins = clampInt(parsed.wins, 0, 9999);
-        if(Number.isFinite(parsed.losses)) s.losses = clampInt(parsed.losses, 0, 9999);
+
+        if(Array.isArray(p.circles)){
+          const arr = p.circles.slice(0, TOTAL).map(Boolean);
+          while(arr.length < TOTAL) arr.push(false);
+          s.circles = arr;
+        }
+        if(Number.isFinite(p.wins)) s.wins = clampInt(p.wins, 0, 9999);
+        if(Number.isFinite(p.losses)) s.losses = clampInt(p.losses, 0, 9999);
         return s;
       }catch(e){
         return defaultState();
@@ -427,81 +375,51 @@
       localStorage.setItem(LS_KEY, JSON.stringify(state));
     }
 
-    function clampInt(n, min, max){
-      n = Math.trunc(n);
-      return Math.max(min, Math.min(max, n));
-    }
-
     let state = loadState();
 
-    /***********************
-     * ELEMENTS
-     ***********************/
-    const circleRailEl = document.getElementById("circleRail");
-    const gridEl = document.getElementById("grid");
+    const circleGridEl = document.getElementById("circleGrid");
     const winsValueEl = document.getElementById("winsValue");
     const lossesValueEl = document.getElementById("lossesValue");
-    const statusTextEl = document.getElementById("statusText");
 
-    // Buttons
+    const resetCirclesBtn = document.getElementById("resetCirclesBtn");
     const addWinBtn = document.getElementById("addWinBtn");
     const removeWinBtn = document.getElementById("removeWinBtn");
     const addLossBtn = document.getElementById("addLossBtn");
     const removeLossBtn = document.getElementById("removeLossBtn");
     const resetRecordBtn = document.getElementById("resetRecordBtn");
 
-    const resetCirclesBtn = document.getElementById("resetCirclesBtn");
-    const resetGridBtn = document.getElementById("resetGridBtn");
-    const hardResetBtn = document.getElementById("hardResetBtn");
-
-    /***********************
-     * RENDER
-     ***********************/
     function renderCircles(){
-      circleRailEl.innerHTML = "";
-      state.circles.forEach((filled, i) => {
-        const c = document.createElement("div");
-        c.className = "circle" + (filled ? " filled" : "");
-        c.title = "Toggle circle " + (i+1);
-        c.setAttribute("role","button");
-        c.setAttribute("tabindex","0");
-        c.innerHTML = `<div class="num">${i+1}</div>`;
-        c.addEventListener("click", () => toggleCircle(i));
-        c.addEventListener("keydown", (e) => {
-          if(e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            toggleCircle(i);
-          }
-        });
-        circleRailEl.appendChild(c);
-      });
-    }
+      circleGridEl.innerHTML = "";
+      let idx = 0;
 
-    function renderGrid(){
-      gridEl.innerHTML = "";
-      state.grid.forEach((on, i) => {
-        const cell = document.createElement("div");
-        cell.className = "cell" + (on ? " on" : "");
-        cell.title = "Toggle square " + (i+1);
-        cell.setAttribute("role","button");
-        cell.setAttribute("tabindex","0");
-        cell.innerHTML = `<div class="txt">${i+1}</div>`;
-        cell.addEventListener("click", () => toggleCell(i));
-        cell.addEventListener("keydown", (e) => {
-          if(e.key === "Enter" || e.key === " "){
-            e.preventDefault();
-            toggleCell(i);
-          }
-        });
-        gridEl.appendChild(cell);
-      });
+      ROWS.forEach((count, rowNum) => {
+        const row = document.createElement("div");
+        row.className = "circleRow";
+        row.setAttribute("aria-label", `Row ${rowNum+1}`);
 
-      const remaining = state.grid.filter(v => !v).length;
-      if(remaining === 1){
-        statusTextEl.textContent = "One left… THAT is the last circle.";
-      }else{
-        statusTextEl.textContent = `Remaining squares: ${remaining}`;
-      }
+        for(let j=0; j<count; j++){
+          const i = idx; // capture
+          const c = document.createElement("div");
+          c.className = "circle" + (state.circles[i] ? " on" : "");
+          c.setAttribute("role","button");
+          c.setAttribute("tabindex","0");
+          c.title = "Toggle circle " + (i+1);
+          c.innerHTML = `<div class="num">${i+1}</div>`;
+
+          c.addEventListener("click", () => toggleCircle(i));
+          c.addEventListener("keydown", (e) => {
+            if(e.key === "Enter" || e.key === " "){
+              e.preventDefault();
+              toggleCircle(i);
+            }
+          });
+
+          row.appendChild(c);
+          idx++;
+        }
+
+        circleGridEl.appendChild(row);
+      });
     }
 
     function renderRecord(){
@@ -509,25 +427,10 @@
       lossesValueEl.textContent = state.losses;
     }
 
-    function renderAll(){
-      renderCircles();
-      renderGrid();
-      renderRecord();
-    }
-
-    /***********************
-     * ACTIONS
-     ***********************/
     function toggleCircle(i){
       state.circles[i] = !state.circles[i];
       saveState();
       renderCircles();
-    }
-
-    function toggleCell(i){
-      state.grid[i] = !state.grid[i];
-      saveState();
-      renderGrid();
     }
 
     function addWin(){
@@ -535,23 +438,26 @@
       saveState();
       renderRecord();
     }
-
     function removeWin(){
       state.wins = clampInt(state.wins - 1, 0, 9999);
       saveState();
       renderRecord();
     }
-
     function addLoss(){
       state.losses = clampInt(state.losses + 1, 0, 9999);
       saveState();
       renderRecord();
     }
-
     function removeLoss(){
       state.losses = clampInt(state.losses - 1, 0, 9999);
       saveState();
       renderRecord();
+    }
+
+    function resetCircles(){
+      state.circles = Array(TOTAL).fill(false);
+      saveState();
+      renderCircles();
     }
 
     function resetRecord(){
@@ -561,41 +467,17 @@
       renderRecord();
     }
 
-    function resetCircles(){
-      state.circles = Array(CIRCLE_COUNT).fill(false);
-      saveState();
-      renderCircles();
-    }
+    resetCirclesBtn.addEventListener("click", resetCircles);
 
-    function resetGrid(){
-      state.grid = Array(GRID_COUNT).fill(false);
-      saveState();
-      renderGrid();
-    }
-
-    function hardReset(){
-      state = defaultState();
-      saveState();
-      renderAll();
-    }
-
-    /***********************
-     * HOOK UP EVENTS
-     ***********************/
     addWinBtn.addEventListener("click", addWin);
     removeWinBtn.addEventListener("click", removeWin);
     addLossBtn.addEventListener("click", addLoss);
     removeLossBtn.addEventListener("click", removeLoss);
     resetRecordBtn.addEventListener("click", resetRecord);
 
-    resetCirclesBtn.addEventListener("click", resetCircles);
-    resetGridBtn.addEventListener("click", resetGrid);
-    hardResetBtn.addEventListener("click", hardReset);
-
-    /***********************
-     * INIT
-     ***********************/
-    renderAll();
+    // init
+    renderCircles();
+    renderRecord();
   </script>
 </body>
 </html>
