@@ -1,764 +1,141 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>The Last Circle</title>
   <style>
-    :root{
-      --bg:#0b0f14;
-      --panel:#121a23;
-      --panel2:#0f1620;
-      --text:#e8eef7;
-      --muted:#9fb0c6;
-      --line:#223043;
-      --good:#2dd4bf;
-      --bad:#fb7185;
-      --warn:#fbbf24;
-      --btn:#1f2a3a;
-      --btn2:#263449;
-      --shadow: 0 12px 30px rgba(0,0,0,.35);
-      --radius: 16px;
+    :root { --size: 44px; --gap: 12px; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      margin: 0; padding: 24px;
+      display: grid; place-items: center;
+      background: #0b0b0b; color: #f2f2f2;
     }
+    .wrap { width: min(520px, 100%); }
+    h1 { font-size: 18px; font-weight: 650; margin: 0 0 18px; opacity: .9; }
+    .board { display: grid; gap: 14px; padding: 18px; border-radius: 14px; background: #141414; }
+    .row { display: flex; gap: var(--gap); justify-content: center; }
+    .circle {
+      width: var(--size); height: var(--size);
+      border-radius: 50%;
+      border: 2px solid #f2f2f2;
+      background: transparent;
+      cursor: pointer;
+      touch-action: manipulation;
+      transition: transform .06s ease, background .12s ease;
+    }
+    .circle:active { transform: scale(.96); }
+    .circle.filled { background: #f2f2f2; }
 
-    *{box-sizing:border-box}
-    body{
-      margin:0;
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
-      background: radial-gradient(1200px 700px at 20% 10%, rgba(45,212,191,.12), transparent 55%),
-                  radial-gradient(900px 600px at 90% 10%, rgba(251,113,133,.10), transparent 55%),
-                  radial-gradient(900px 700px at 50% 110%, rgba(59,130,246,.10), transparent 60%),
-                  var(--bg);
-      color:var(--text);
-      min-height:100vh;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
+    .controls {
+      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+      margin-top: 14px;
     }
-
-    .wrap{
-      width:min(1100px, 100%);
-      display:grid;
-      grid-template-columns: 1.25fr .95fr;
-      gap:16px;
+    button {
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #2a2a2a;
+      background: #1b1b1b;
+      color: #f2f2f2;
+      cursor: pointer;
     }
-
-    @media (max-width: 920px){
-      .wrap{grid-template-columns:1fr; }
-    }
-
-    .card{
-      background: linear-gradient(180deg, rgba(18,26,35,.92), rgba(15,22,32,.92));
-      border: 1px solid rgba(34,48,67,.7);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      overflow:hidden;
-    }
-
-    .hdr{
-      padding:16px 18px;
-      border-bottom: 1px solid rgba(34,48,67,.7);
-      display:flex;
-      align-items:flex-start;
-      justify-content:space-between;
-      gap:12px;
-    }
-
-    .title{
-      display:flex; flex-direction:column; gap:6px;
-    }
-    .title h1{
-      margin:0;
-      font-size: 20px;
-      letter-spacing:.4px;
-      font-weight:800;
-    }
-    .title p{
-      margin:0;
-      color:var(--muted);
-      font-size: 13px;
-      line-height:1.35;
-    }
-
-    .pill{
-      display:inline-flex;
-      align-items:center;
-      gap:8px;
-      padding:8px 10px;
-      background: rgba(31,42,58,.7);
-      border:1px solid rgba(34,48,67,.7);
-      border-radius: 999px;
-      color: var(--muted);
-      font-size: 12px;
-      white-space:nowrap;
-    }
-
-    .content{
-      padding:16px 18px 18px;
-    }
-
-    .grid{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:12px;
-    }
-    @media (max-width: 520px){
-      .grid{grid-template-columns:1fr;}
-    }
-
-    .section{
-      background: rgba(15,22,32,.65);
-      border:1px solid rgba(34,48,67,.65);
-      border-radius: 14px;
-      padding:14px;
-    }
-
-    .section h2{
-      margin:0 0 10px 0;
-      font-size:14px;
-      letter-spacing:.3px;
-      color:#d7e3f5;
-    }
-
-    .row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-      flex-wrap:wrap;
-    }
-
-    .stat{
-      display:flex;
-      flex-direction:column;
-      gap:4px;
-      min-width: 120px;
-    }
-    .stat .label{
-      font-size: 11px;
-      color: var(--muted);
-      letter-spacing:.25px;
-    }
-    .stat .value{
-      font-size: 28px;
-      font-weight: 900;
-      letter-spacing:.5px;
-      line-height:1;
-    }
-
-    .value.good{color: var(--good)}
-    .value.bad{color: var(--bad)}
-    .value.warn{color: var(--warn)}
-
-    .controls{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-top: 6px;
-    }
-
-    input[type="number"], input[type="text"], select{
-      background: rgba(11,15,20,.8);
-      color: var(--text);
-      border: 1px solid rgba(34,48,67,.9);
-      border-radius: 12px;
-      padding: 10px 12px;
-      outline:none;
-      width:100%;
-      font-size: 14px;
-    }
-    input[type="number"]{appearance:textfield}
-    input[type="number"]::-webkit-outer-spin-button,
-    input[type="number"]::-webkit-inner-spin-button{ -webkit-appearance: none; margin:0;}
-
-    .btnRow{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-    }
-
-    button{
-      border:0;
-      border-radius: 12px;
-      background: var(--btn);
-      color: var(--text);
-      padding: 10px 12px;
-      cursor:pointer;
-      border: 1px solid rgba(34,48,67,.85);
-      transition: transform .06s ease, background .12s ease, border-color .12s ease;
-      font-weight:700;
-      letter-spacing:.25px;
-      font-size: 13px;
-    }
-    button:hover{ background: var(--btn2); border-color: rgba(80,110,150,.65); }
-    button:active{ transform: translateY(1px); }
-
-    .primary{ background: rgba(45,212,191,.18); border-color: rgba(45,212,191,.35); }
-    .primary:hover{ background: rgba(45,212,191,.24); border-color: rgba(45,212,191,.45); }
-
-    .danger{ background: rgba(251,113,133,.16); border-color: rgba(251,113,133,.35); }
-    .danger:hover{ background: rgba(251,113,133,.22); border-color: rgba(251,113,133,.45); }
-
-    .ghost{ background: rgba(31,42,58,.45); }
-
-    .note{
-      margin-top:10px;
-      font-size:12px;
-      color: var(--muted);
-      line-height:1.35;
-    }
-
-    .bigDisplay{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      text-align:center;
-      padding: 18px 10px;
-      border-radius: 14px;
-      background: rgba(11,15,20,.7);
-      border: 1px solid rgba(34,48,67,.75);
-      min-height: 120px;
-      margin-top: 10px;
-    }
-    .bigDisplay .n{
-      font-size: 54px;
-      font-weight: 950;
-      letter-spacing: 1px;
-      line-height:1;
-    }
-    .bigDisplay .sub{
-      margin-top: 6px;
-      font-size: 12px;
-      color: var(--muted);
-    }
-
-    .log{
-      margin-top: 10px;
-      background: rgba(11,15,20,.7);
-      border:1px solid rgba(34,48,67,.75);
-      border-radius: 14px;
-      padding: 10px;
-      max-height: 220px;
-      overflow:auto;
-      font-size: 12px;
-      color: #c9d6ea;
-      line-height: 1.35;
-      white-space: pre-wrap;
-    }
-
-    .footerBar{
-      display:flex;
-      gap:10px;
-      flex-wrap:wrap;
-      margin-top: 12px;
-      justify-content:space-between;
-      align-items:center;
-    }
-
-    .mini{
-      font-size:12px;
-      color: var(--muted);
-    }
-
-    .kbd{
-      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-size: 11px;
-      padding: 2px 6px;
-      border-radius: 8px;
-      border: 1px solid rgba(34,48,67,.9);
-      background: rgba(11,15,20,.7);
-      color: #cfe0fb;
-    }
+    button:hover { background: #222; }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    .note { margin-top: 10px; font-size: 12px; opacity: .7; text-align:center; }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <!-- LEFT: GAME -->
-    <div class="card" id="gameCard">
-      <div class="hdr">
-        <div class="title">
-          <h1>The Last Circle</h1>
-          <p>
-            Take <span class="kbd">1</span>, <span class="kbd">2</span>, or <span class="kbd">3</span> circles.
-            Whoever takes the <b>last</b> circle wins.
-          </p>
-        </div>
-        <div class="pill" id="statusPill">Status: Ready</div>
-      </div>
+    <h1>The Last Circle (tap to fill/unfill)</h1>
 
-      <div class="content">
-        <div class="grid">
-          <div class="section">
-            <h2>Game Setup</h2>
-            <div class="controls">
-              <label class="mini" for="startCount">Starting circles</label>
-              <input id="startCount" type="number" min="1" max="999" value="21" />
-              <div class="btnRow">
-                <button class="primary" id="btnStart">Start / Restart</button>
-                <button class="ghost" id="btnResetAll">Reset Everything</button>
-              </div>
-              <div class="note">
-                Tip: <span class="kbd">S</span> to start/restart.
-              </div>
-            </div>
-          </div>
+    <div id="board" class="board" aria-label="game board"></div>
 
-          <div class="section">
-            <h2>Turn</h2>
-            <div class="controls">
-              <label class="mini" for="turnSelect">Whose turn</label>
-              <select id="turnSelect">
-                <option value="host">Host</option>
-                <option value="guest">Guest</option>
-              </select>
-
-              <label class="mini" for="takeAmount">Take amount (1–3)</label>
-              <input id="takeAmount" type="number" min="1" max="3" value="1" />
-
-              <div class="btnRow">
-                <button class="primary" id="btnTake">Take</button>
-                <button class="ghost" id="btnUndo">Undo Last Move</button>
-                <button class="danger" id="btnForfeit">Forfeit Round</button>
-              </div>
-
-              <div class="note">
-                Shortcuts: <span class="kbd">1</span>/<span class="kbd">2</span>/<span class="kbd">3</span> to take •
-                <span class="kbd">U</span> undo • <span class="kbd">F</span> forfeit
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="bigDisplay" aria-live="polite">
-          <div>
-            <div class="n" id="circlesLeft">21</div>
-            <div class="sub" id="roundInfo">Round 1 • Host to move</div>
-          </div>
-        </div>
-
-        <div class="log" id="logBox"></div>
-
-        <div class="footerBar">
-          <div class="mini" id="saveInfo">Auto-saves locally to this browser.</div>
-          <div class="mini">Made for TikTok Live overlay vibes ✨</div>
-        </div>
-      </div>
+    <div class="controls">
+      <button id="undoBtn" disabled>Undo</button>
+      <button id="clearBtn">Clear</button>
+      <button id="restartBtn">Restart</button>
     </div>
 
-    <!-- RIGHT: SCOREBOARD -->
-    <div class="card" id="scoreCard">
-      <div class="hdr">
-        <div class="title">
-          <h1>Scoreboard</h1>
-          <p>Host record + round wins. Now includes <b>subtract</b> buttons for wins/losses.</p>
-        </div>
-        <div class="pill" id="modePill">Mode: Manual</div>
-      </div>
-
-      <div class="content">
-        <div class="section">
-          <h2>Round Wins</h2>
-          <div class="row" style="justify-content:space-between;">
-            <div class="stat">
-              <div class="label">Host wins</div>
-              <div class="value good" id="hostRoundWins">0</div>
-            </div>
-            <div class="stat">
-              <div class="label">Guest wins</div>
-              <div class="value bad" id="guestRoundWins">0</div>
-            </div>
-          </div>
-
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="ghost" id="btnRoundHostPlus">Host +1</button>
-            <button class="ghost" id="btnRoundHostMinus">Host -1</button>
-            <button class="ghost" id="btnRoundGuestPlus">Guest +1</button>
-            <button class="ghost" id="btnRoundGuestMinus">Guest -1</button>
-          </div>
-
-          <div class="note">
-            These track round outcomes for the stream.
-          </div>
-        </div>
-
-        <div class="section" style="margin-top:12px;">
-          <h2>Host Record</h2>
-          <div class="row" style="justify-content:space-between;">
-            <div class="stat">
-              <div class="label">Wins</div>
-              <div class="value good" id="hostWins">0</div>
-            </div>
-            <div class="stat">
-              <div class="label">Losses</div>
-              <div class="value bad" id="hostLosses">0</div>
-            </div>
-          </div>
-
-          <div class="btnRow" style="margin-top:10px;">
-            <button class="primary" id="btnHostWinPlus">+ Win</button>
-            <button class="danger" id="btnHostWinMinus">- Win</button>
-            <button class="primary" id="btnHostLossPlus">+ Loss</button>
-            <button class="danger" id="btnHostLossMinus">- Loss</button>
-          </div>
-
-          <div class="note">
-            Record buttons clamp at <b>0</b> so you can’t go negative.
-          </div>
-        </div>
-
-        <div class="section" style="margin-top:12px;">
-          <h2>Names (Optional)</h2>
-          <div class="controls">
-            <label class="mini" for="hostName">Host name</label>
-            <input id="hostName" type="text" placeholder="Host" value="Host"/>
-            <label class="mini" for="guestName">Guest name</label>
-            <input id="guestName" type="text" placeholder="Guest" value="Guest"/>
-            <button class="ghost" id="btnSaveNames">Save Names</button>
-            <div class="note">
-              Names update the UI + log. Saved locally.
-            </div>
-          </div>
-        </div>
-      </div>
+    <div class="note">
+      “Clear” empties all circles. “Restart” restores the original layout (same here for now).
     </div>
   </div>
 
-<script>
-(() => {
-  const STORAGE_KEY = "last_circle_v2_state";
+  <script>
+    // Row sizes: 3, 4, 5, 6
+    const ROWS = [3, 4, 5, 6];
 
-  const el = (id) => document.getElementById(id);
+    const boardEl = document.getElementById('board');
+    const undoBtn = document.getElementById('undoBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const restartBtn = document.getElementById('restartBtn');
 
-  // Game UI
-  const startCountEl = el("startCount");
-  const btnStart = el("btnStart");
-  const btnResetAll = el("btnResetAll");
-  const turnSelect = el("turnSelect");
-  const takeAmountEl = el("takeAmount");
-  const btnTake = el("btnTake");
-  const btnUndo = el("btnUndo");
-  const btnForfeit = el("btnForfeit");
-  const circlesLeftEl = el("circlesLeft");
-  const roundInfoEl = el("roundInfo");
-  const logBox = el("logBox");
-  const statusPill = el("statusPill");
+    // state: array of arrays of booleans
+    let state = [];
+    let history = []; // stack of previous states
 
-  // Score UI
-  const hostRoundWinsEl = el("hostRoundWins");
-  const guestRoundWinsEl = el("guestRoundWins");
-  const hostWinsEl = el("hostWins");
-  const hostLossesEl = el("hostLosses");
-  const modePill = el("modePill");
-
-  const btnRoundHostPlus = el("btnRoundHostPlus");
-  const btnRoundHostMinus = el("btnRoundHostMinus");
-  const btnRoundGuestPlus = el("btnRoundGuestPlus");
-  const btnRoundGuestMinus = el("btnRoundGuestMinus");
-
-  const btnHostWinPlus = el("btnHostWinPlus");
-  const btnHostWinMinus = el("btnHostWinMinus");
-  const btnHostLossPlus = el("btnHostLossPlus");
-  const btnHostLossMinus = el("btnHostLossMinus");
-
-  const hostNameEl = el("hostName");
-  const guestNameEl = el("guestName");
-  const btnSaveNames = el("btnSaveNames");
-
-  const clamp0 = (n) => Math.max(0, n|0);
-
-  const nowTime = () => {
-    const d = new Date();
-    return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"});
-  };
-
-  const defaults = {
-    names: { host: "Host", guest: "Guest" },
-    game: {
-      round: 1,
-      circlesLeft: 21,
-      toMove: "host",
-      inProgress: false,
-      history: [] // stack of {circlesLeftBefore, toMoveBefore, actionText}
-    },
-    scoreboard: {
-      roundWins: { host: 0, guest: 0 },
-      hostRecord: { wins: 0, losses: 0 }
-    },
-    log: []
-  };
-
-  let state = loadState();
-
-  function loadState(){
-    try{
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if(!raw) return structuredClone(defaults);
-      const parsed = JSON.parse(raw);
-      // merge safely
-      return {
-        ...structuredClone(defaults),
-        ...parsed,
-        names: { ...defaults.names, ...(parsed.names||{}) },
-        game: { ...defaults.game, ...(parsed.game||{}), history: (parsed.game?.history||[]) },
-        scoreboard: {
-          ...defaults.scoreboard,
-          ...(parsed.scoreboard||{}),
-          roundWins: { ...defaults.scoreboard.roundWins, ...(parsed.scoreboard?.roundWins||{}) },
-          hostRecord: { ...defaults.scoreboard.hostRecord, ...(parsed.scoreboard?.hostRecord||{}) },
-        },
-        log: Array.isArray(parsed.log) ? parsed.log : []
-      };
-    }catch{
-      return structuredClone(defaults);
-    }
-  }
-
-  function saveState(){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  }
-
-  function addLog(line){
-    const entry = `[${nowTime()}] ${line}`;
-    state.log.push(entry);
-    // keep log from growing forever
-    if(state.log.length > 250) state.log = state.log.slice(-200);
-    renderLog();
-    saveState();
-  }
-
-  function renderLog(){
-    logBox.textContent = state.log.join("\n");
-    logBox.scrollTop = logBox.scrollHeight;
-  }
-
-  function setStatus(text){
-    statusPill.textContent = `Status: ${text}`;
-  }
-
-  function updateNamesUI(){
-    hostNameEl.value = state.names.host;
-    guestNameEl.value = state.names.guest;
-
-    // Update turn dropdown labels
-    turnSelect.options[0].textContent = state.names.host;
-    turnSelect.options[1].textContent = state.names.guest;
-  }
-
-  function renderGame(){
-    circlesLeftEl.textContent = String(state.game.circlesLeft);
-    const mover = state.game.toMove === "host" ? state.names.host : state.names.guest;
-    roundInfoEl.textContent = `Round ${state.game.round} • ${mover} to move`;
-
-    turnSelect.value = state.game.toMove;
-
-    btnTake.disabled = !state.game.inProgress;
-    btnForfeit.disabled = !state.game.inProgress;
-    btnUndo.disabled = state.game.history.length === 0;
-
-    setStatus(state.game.inProgress ? "In Progress" : "Ready");
-  }
-
-  function renderScore(){
-    hostRoundWinsEl.textContent = String(state.scoreboard.roundWins.host);
-    guestRoundWinsEl.textContent = String(state.scoreboard.roundWins.guest);
-    hostWinsEl.textContent = String(state.scoreboard.hostRecord.wins);
-    hostLossesEl.textContent = String(state.scoreboard.hostRecord.losses);
-  }
-
-  function renderAll(){
-    updateNamesUI();
-    renderGame();
-    renderScore();
-    renderLog();
-  }
-
-  function startRound(){
-    let start = parseInt(startCountEl.value, 10);
-    if(!Number.isFinite(start) || start < 1) start = 21;
-    if(start > 999) start = 999;
-    startCountEl.value = start;
-
-    state.game.round = clamp0(state.game.round) || 1;
-    state.game.circlesLeft = start;
-    state.game.toMove = "host";
-    state.game.inProgress = true;
-    state.game.history = [];
-
-    addLog(`Round ${state.game.round} started with ${start} circles. ${state.names.host} to move.`);
-    renderGame();
-    saveState();
-  }
-
-  function endRound(winnerKey, reason){
-    const winnerName = winnerKey === "host" ? state.names.host : state.names.guest;
-    const loserKey = winnerKey === "host" ? "guest" : "host";
-    const loserName = loserKey === "host" ? state.names.host : state.names.guest;
-
-    state.game.inProgress = false;
-
-    // Update round wins scoreboard
-    state.scoreboard.roundWins[winnerKey] = clamp0(state.scoreboard.roundWins[winnerKey] + 1);
-
-    // Update host record (only host record)
-    if(winnerKey === "host"){
-      state.scoreboard.hostRecord.wins = clamp0(state.scoreboard.hostRecord.wins + 1);
-    } else {
-      state.scoreboard.hostRecord.losses = clamp0(state.scoreboard.hostRecord.losses + 1);
+    function deepCopyState(s) {
+      return s.map(row => row.slice());
     }
 
-    addLog(`${winnerName} wins Round ${state.game.round} (${reason}). ${loserName} loses.`);
-    setStatus("Round Over");
-
-    // Prepare next round number
-    state.game.round = clamp0(state.game.round + 1);
-    renderAll();
-    saveState();
-  }
-
-  function takeMove(amount){
-    if(!state.game.inProgress) return;
-
-    amount = parseInt(amount, 10);
-    if(!Number.isFinite(amount) || amount < 1) amount = 1;
-    if(amount > 3) amount = 3;
-
-    if(amount > state.game.circlesLeft){
-      addLog(`Invalid move: tried to take ${amount} but only ${state.game.circlesLeft} left.`);
-      return;
+    function init() {
+      state = ROWS.map(n => Array(n).fill(false));
+      history = [];
+      render();
+      updateButtons();
     }
 
-    const moverKey = state.game.toMove;
-    const moverName = moverKey === "host" ? state.names.host : state.names.guest;
+    function pushHistory() {
+      history.push(deepCopyState(state));
+      updateButtons();
+    }
 
-    // push history for undo
-    state.game.history.push({
-      circlesLeftBefore: state.game.circlesLeft,
-      toMoveBefore: state.game.toMove,
-      actionText: `${moverName} took ${amount}`
+    function updateButtons() {
+      undoBtn.disabled = history.length === 0;
+    }
+
+    function render() {
+      boardEl.innerHTML = '';
+      state.forEach((row, rIdx) => {
+        const rowEl = document.createElement('div');
+        rowEl.className = 'row';
+
+        row.forEach((filled, cIdx) => {
+          const btn = document.createElement('button');
+          btn.className = 'circle' + (filled ? ' filled' : '');
+          btn.setAttribute('aria-label', `Row ${rIdx + 1} circle ${cIdx + 1}`);
+          btn.addEventListener('click', () => {
+            pushHistory();
+            state[rIdx][cIdx] = !state[rIdx][cIdx];
+            render();
+          });
+          rowEl.appendChild(btn);
+        });
+
+        boardEl.appendChild(rowEl);
+      });
+    }
+
+    undoBtn.addEventListener('click', () => {
+      if (!history.length) return;
+      state = history.pop();
+      render();
+      updateButtons();
     });
 
-    state.game.circlesLeft -= amount;
-    addLog(`${moverName} took ${amount}. (${state.game.circlesLeft} left)`);
+    clearBtn.addEventListener('click', () => {
+      pushHistory();
+      state = state.map(row => row.map(() => false));
+      render();
+    });
 
-    if(state.game.circlesLeft === 0){
-      endRound(moverKey, "took the last circle");
-      return;
-    }
+    restartBtn.addEventListener('click', () => {
+      // For now restart = reset board and clear history
+      init();
+    });
 
-    // switch turn
-    state.game.toMove = (state.game.toMove === "host") ? "guest" : "host";
-    renderGame();
-    saveState();
-  }
-
-  function undoLast(){
-    const h = state.game.history;
-    if(h.length === 0) return;
-
-    const last = h.pop();
-    state.game.circlesLeft = last.circlesLeftBefore;
-    state.game.toMove = last.toMoveBefore;
-
-    addLog(`Undo: ${last.actionText}. Back to ${state.game.circlesLeft} left.`);
-    renderGame();
-    saveState();
-  }
-
-  function forfeitRound(){
-    if(!state.game.inProgress) return;
-
-    const forfeiterKey = state.game.toMove;
-    const winnerKey = forfeiterKey === "host" ? "guest" : "host";
-
-    const forfeiterName = forfeiterKey === "host" ? state.names.host : state.names.guest;
-    addLog(`${forfeiterName} forfeited.`);
-    endRound(winnerKey, "forfeit");
-  }
-
-  function resetEverything(){
-    if(!confirm("Reset EVERYTHING? (Names, score, rounds, and log)")) return;
-    state = structuredClone(defaults);
-    saveState();
-    addLog("Everything reset."); // this will re-add a single line log
-    renderAll();
-  }
-
-  // Manual scoreboard adjustments (with minus options)
-  function incRoundWin(side, delta){
-    state.scoreboard.roundWins[side] = clamp0(state.scoreboard.roundWins[side] + delta);
-    saveState();
-    renderScore();
-  }
-
-  function incHostRecord(field, delta){
-    state.scoreboard.hostRecord[field] = clamp0(state.scoreboard.hostRecord[field] + delta);
-    saveState();
-    renderScore();
-  }
-
-  // Events
-  btnStart.addEventListener("click", startRound);
-  btnTake.addEventListener("click", () => takeMove(takeAmountEl.value));
-  btnUndo.addEventListener("click", undoLast);
-  btnForfeit.addEventListener("click", forfeitRound);
-  btnResetAll.addEventListener("click", resetEverything);
-
-  turnSelect.addEventListener("change", () => {
-    state.game.toMove = turnSelect.value === "guest" ? "guest" : "host";
-    addLog(`Turn set to ${state.game.toMove === "host" ? state.names.host : state.names.guest}.`);
-    renderGame();
-    saveState();
-  });
-
-  // Scoreboard buttons
-  btnRoundHostPlus.addEventListener("click", () => incRoundWin("host", +1));
-  btnRoundHostMinus.addEventListener("click", () => incRoundWin("host", -1));
-  btnRoundGuestPlus.addEventListener("click", () => incRoundWin("guest", +1));
-  btnRoundGuestMinus.addEventListener("click", () => incRoundWin("guest", -1));
-
-  btnHostWinPlus.addEventListener("click", () => incHostRecord("wins", +1));
-  btnHostWinMinus.addEventListener("click", () => incHostRecord("wins", -1));
-  btnHostLossPlus.addEventListener("click", () => incHostRecord("losses", +1));
-  btnHostLossMinus.addEventListener("click", () => incHostRecord("losses", -1));
-
-  btnSaveNames.addEventListener("click", () => {
-    const h = (hostNameEl.value || "Host").trim().slice(0, 24) || "Host";
-    const g = (guestNameEl.value || "Guest").trim().slice(0, 24) || "Guest";
-    state.names.host = h;
-    state.names.guest = g;
-    addLog(`Names saved: ${h} vs ${g}.`);
-    updateNamesUI();
-    renderGame();
-    saveState();
-  });
-
-  // Keyboard shortcuts
-  window.addEventListener("keydown", (e) => {
-    if(e.target && (e.target.tagName === "INPUT" || e.target.tagName === "SELECT" || e.target.tagName === "TEXTAREA")) return;
-
-    const k = e.key.toLowerCase();
-    if(k === "s"){ startRound(); }
-    if(k === "u"){ undoLast(); }
-    if(k === "f"){ forfeitRound(); }
-
-    if(k === "1" || k === "2" || k === "3"){
-      takeMove(parseInt(k,10));
-    }
-  });
-
-  // Initial render
-  modePill.textContent = "Mode: Manual";
-  renderAll();
-
-  // If previous session was "in progress", reflect it
-  if(state.game.inProgress){
-    addLog(`Resumed: Round ${state.game.round} in progress with ${state.game.circlesLeft} circles left.`);
-    renderGame();
-    saveState();
-  } else {
-    renderGame();
-  }
-})();
-</script>
+    init();
+  </script>
 </body>
 </html>
