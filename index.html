@@ -61,7 +61,7 @@
       margin:0;
       padding-left:18px;
       color: rgba(234,234,234,.92);
-      line-time:1.35;
+      line-height:1.35;
       font-size:13.5px;
     }
     .rules li{ margin:4px 0; }
@@ -119,25 +119,27 @@
       width:54px;
       height:54px;
       border-radius:50%;
-      background: transparent;
+      background: transparent;              /* hollow */
       border:2px solid rgba(57,255,20,.95);
       box-shadow: 0 0 0 2px rgba(57,255,20,.10) inset, 0 0 18px rgba(57,255,20,.14);
       cursor:pointer;
       transition: transform .06s ease, box-shadow .15s ease, background .15s ease;
       user-select:none;
       position:relative;
-      /* IMPORTANT for mobile: */
       touch-action: manipulation;
       -webkit-tap-highlight-color: transparent;
     }
     .circle:hover{ transform: translateY(-1px); }
 
-    /* "Filled"/Selected state */
+    /* ✅ MORE OBVIOUS "FILLED" STATE */
     .circle.on{
-      background: rgba(57,255,20,.18); /* visible fill */
+      /* solid-ish fill + brighter glow so it reads on camera */
+      background: rgba(57,255,20,.85);
       box-shadow:
-        0 0 0 2px rgba(57,255,20,.22) inset,
-        0 0 28px rgba(57,255,20,.42);
+        0 0 0 2px rgba(0,0,0,.25) inset,
+        0 0 34px rgba(57,255,20,.65),
+        0 0 70px rgba(57,255,20,.30);
+      border-color: rgba(57,255,20,1);
     }
 
     .boardNote{
@@ -280,10 +282,9 @@
   </div>
 
   <script>
-    // Exact rows requested: 3 / 4 / 5 / 6
     const ROWS = [3,4,5,6];
     const TOTAL = ROWS.reduce((a,b)=>a+b, 0); // 18
-    const LS_KEY = "last_circle_vertical_layout_v3";
+    const LS_KEY = "last_circle_vertical_layout_v4";
 
     const defaultState = () => ({
       circles: Array(TOTAL).fill(false),
@@ -349,13 +350,11 @@
           c.setAttribute("tabindex","0");
           c.setAttribute("aria-pressed", state.circles[i] ? "true" : "false");
 
-          // Use pointer events (works best across mobile + desktop)
           c.addEventListener("pointerup", (e) => {
             e.preventDefault();
             toggleCircle(i);
           });
 
-          // Also allow keyboard toggle
           c.addEventListener("keydown", (e) => {
             if(e.key === "Enter" || e.key === " "){
               e.preventDefault();
@@ -416,7 +415,6 @@
       renderRecord();
     }
 
-    // Buttons (use pointerup for mobile reliability)
     resetCirclesBtn.addEventListener("pointerup", (e)=>{ e.preventDefault(); resetCircles(); });
 
     addWinBtn.addEventListener("pointerup", (e)=>{ e.preventDefault(); addWin(); });
@@ -425,7 +423,6 @@
     removeLossBtn.addEventListener("pointerup", (e)=>{ e.preventDefault(); removeLoss(); });
     resetRecordBtn.addEventListener("pointerup", (e)=>{ e.preventDefault(); resetRecord(); });
 
-    // init
     renderCircles();
     renderRecord();
   </script>
