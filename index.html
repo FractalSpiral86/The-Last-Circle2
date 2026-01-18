@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
 <title>The Last Circle</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
 <!-- Google Font for the Title -->
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
@@ -91,6 +91,7 @@ body{
   justify-content:space-between;
   align-items:center;
   margin-bottom:10px;
+  gap:10px;
 }
 
 .resetBtn{
@@ -103,28 +104,43 @@ body{
   cursor:pointer;
 }
 
+/*
+  MOBILE FIX:
+  - Circles + gaps scale with viewport using clamp()
+  - Rows can wrap if needed (prevents right-edge overflow)
+*/
 .circleGrid{
   display:flex;
   flex-direction:column;
-  gap:14px;
+  gap:var(--gap);
   align-items:flex-start;
+  overflow-x:hidden;
 }
 
 .circleRow{
   display:flex;
-  gap:14px;
+  flex-wrap:wrap;              /* prevents overflow */
+  gap:var(--gap);
+}
+
+/* Responsive sizing knobs */
+:root{
+  /* Slightly smaller than before for mobile, still big on desktop */
+  --dot: clamp(44px, 11.5vw, 54px);
+  --gap: clamp(10px, 2.6vw, 14px);
 }
 
 /* CIRCLES */
 .circle{
-  width:54px;
-  height:54px;
+  width:var(--dot);
+  height:var(--dot);
   border-radius:50%;
   border:2px solid var(--lime);
   background:transparent;
   box-shadow:0 0 12px rgba(57,255,20,.25);
   cursor:pointer;
   transition:0.15s;
+  flex: 0 0 auto;
 }
 
 .circle.on{
@@ -192,11 +208,15 @@ body{
   color:#ff9c9c;
   border:1px solid #7a2c2c;
 }
+
+/* Smaller title on phones so everything breathes */
+@media (max-width: 420px){
+  .gameTitle{ font-size:34px; letter-spacing:3px; }
+}
 </style>
 </head>
 
 <body>
-
 <div class="app">
 
   <!-- GAME TITLE -->
@@ -256,7 +276,7 @@ body{
 <script>
 const ROWS = [3,4,5,6];
 const TOTAL = ROWS.reduce((a,b)=>a+b,0);
-const STORAGE_KEY = "last_circle_final";
+const STORAGE_KEY = "last_circle_final_v2_responsive";
 
 let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
   circles:Array(TOTAL).fill(false),
@@ -265,23 +285,25 @@ let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
 };
 
 function save(){
-  localStorage.setItem(STORAGE_KEY,JSON.stringify(state));
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 /* Build circles */
 const grid = document.getElementById("circleGrid");
 
 function renderCircles(){
-  grid.innerHTML="";
-  let idx=0;
-  ROWS.forEach(count=>{
-    const row=document.createElement("div");
-    row.className="circleRow";
+  grid.innerHTML = "";
+  let idx = 0;
+
+  ROWS.forEach(count => {
+    const row = document.createElement("div");
+    row.className = "circleRow";
+
     for(let i=0;i<count;i++){
-      const c=document.createElement("div");
-      c.className="circle"+(state.circles[idx]?" on":"");
-      const index=idx;
-      c.onclick=()=>toggleCircle(index);
+      const c = document.createElement("div");
+      c.className = "circle" + (state.circles[idx] ? " on" : "");
+      const index = idx;
+      c.onclick = () => toggleCircle(index);
       row.appendChild(c);
       idx++;
     }
@@ -290,29 +312,29 @@ function renderCircles(){
 }
 
 function toggleCircle(i){
-  state.circles[i]=!state.circles[i];
+  state.circles[i] = !state.circles[i];
   save();
   renderCircles();
 }
 
 /* Record */
-const winsEl=document.getElementById("wins");
-const lossesEl=document.getElementById("losses");
+const winsEl = document.getElementById("wins");
+const lossesEl = document.getElementById("losses");
 
 function renderRecord(){
-  winsEl.textContent=state.wins;
-  lossesEl.textContent=state.losses;
+  winsEl.textContent = state.wins;
+  lossesEl.textContent = state.losses;
 }
 
-document.getElementById("addWin").onclick=()=>{state.wins++;save();renderRecord();};
-document.getElementById("subWin").onclick=()=>{if(state.wins>0)state.wins--;save();renderRecord();};
-document.getElementById("addLoss").onclick=()=>{state.losses++;save();renderRecord();};
-document.getElementById("subLoss").onclick=()=>{if(state.losses>0)state.losses--;save();renderRecord();};
-document.getElementById("resetRecord").onclick=()=>{state.wins=0;state.losses=0;save();renderRecord();};
+document.getElementById("addWin").onclick = () => { state.wins++; save(); renderRecord(); };
+document.getElementById("subWin").onclick = () => { if(state.wins > 0) state.wins--; save(); renderRecord(); };
+document.getElementById("addLoss").onclick = () => { state.losses++; save(); renderRecord(); };
+document.getElementById("subLoss").onclick = () => { if(state.losses > 0) state.losses--; save(); renderRecord(); };
+document.getElementById("resetRecord").onclick = () => { state.wins = 0; state.losses = 0; save(); renderRecord(); };
 
 /* Reset Circles */
-document.getElementById("resetCircles").onclick=()=>{
-  state.circles=Array(TOTAL).fill(false);
+document.getElementById("resetCircles").onclick = () => {
+  state.circles = Array(TOTAL).fill(false);
   save();
   renderCircles();
 };
