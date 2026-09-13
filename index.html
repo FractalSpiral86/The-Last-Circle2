@@ -128,6 +128,8 @@ async function joinGame(given){
  }finally{
   $("join").disabled=false;
  }
+}
+ 
 function enter(code){
  roomId=code;selected.clear();recordedRound=null;history.replaceState({},"",invite(code));
  $("lobby").classList.add("hidden");$("roomPanel").classList.remove("hidden");$("roomCode").textContent=code;$("shareLink").value=invite(code);
