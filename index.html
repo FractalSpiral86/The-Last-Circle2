@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSION: MULTIPLAYER-APP-CHECK-24H-CLEANUP-2026-09-13 -->
+<!-- VERSION: MULTIPLAYER-CHAT-NOTIFICATIONS-APP-CHECK-CLEANUP-2026-09-13 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -21,6 +21,7 @@ h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12
 .shareRow{margin-top:12px}.shareLink{min-width:0;flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:#020702;color:#ccc}.startBox{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.startBox p{margin:0 0 10px;color:var(--muted);font-size:13px}
 .circleGrid{display:flex;flex-direction:column;gap:var(--gap);align-items:flex-start;overflow:hidden}.circleRow{display:flex;gap:var(--gap)}.circle{width:var(--dot);height:var(--dot);flex:0 0 auto;padding:0;border:2px solid var(--lime);border-radius:50%;background:transparent;box-shadow:0 0 12px #39ff1440;cursor:pointer;transition:.15s}.circle.selected{background:#39ff1459;box-shadow:0 0 22px #39ff14aa}.circle.removed{background:var(--lime);box-shadow:0 0 25px #39ff14aa;opacity:.68}.actions{margin-top:14px;grid-template-columns:2fr 1fr}
 .wl{display:flex;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:#0006}.label{font-size:12px;color:var(--muted)}.value{font-size:26px;font-weight:800}
+.chatMessages{height:230px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:10px;border:1px solid var(--border);border-radius:12px;background:#0007}.chatEmpty{margin:auto;color:var(--muted);font-size:13px}.bubble{max-width:82%;padding:8px 11px;border-radius:13px;background:#222;border:1px solid #444;overflow-wrap:anywhere}.bubble.mine{align-self:flex-end;background:#063a06;border-color:#39ff1459}.bubbleName{color:var(--lime);font-size:10px;font-weight:800;text-transform:uppercase}.bubbleText{margin-top:3px;font-size:14px}.chatForm{display:flex;gap:8px;margin-top:10px}.chatInput{min-width:0;flex:1;padding:11px;border:1px solid var(--border);border-radius:12px;background:#020702;color:#fff}
 @media(max-width:620px){.title{font-size:34px;letter-spacing:3px}.lobbyGrid,.startButtons{grid-template-columns:1fr}.shareRow{display:grid}}
 </style>
 </head>
@@ -39,6 +40,7 @@ h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12
  <section class="panel hidden" id="roomPanel">
   <div class="topRow"><div class="badges"><span class="badge">Room <strong id="roomCode">------</strong></span><span class="badge" id="playerBadge">Player —</span></div><button class="btn danger" id="leave">Leave</button></div>
   <div class="status" id="status">Loading…</div>
+  <button class="btn secondary" id="notifications">Enable Notifications</button>
   <div class="shareRow" id="shareRow"><input class="shareLink" id="shareLink" readonly><button class="btn secondary" id="copy">Copy Invite</button></div>
   <div class="startBox hidden" id="startBox"><p>After rock-paper-scissors, choose who should move first:</p><div class="startButtons"><button class="btn primary" id="meFirst">I Start</button><button class="btn secondary" id="themFirst">Opponent Starts</button></div></div>
  </section>
@@ -47,13 +49,14 @@ h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12
   <div class="actions"><button class="btn primary" id="confirm" disabled>Confirm Move</button><button class="btn secondary" id="clear" disabled>Clear</button></div>
   <div class="actions hidden" id="finished"><button class="btn primary" id="again">Play Again</button><button class="btn secondary" id="newRoom">New Room</button></div>
  </section>
+ <section class="panel hidden" id="chatPanel"><h2>Room Chat</h2><div class="chatMessages" id="chatMessages"><div class="chatEmpty">Waiting for messages…</div></div><form class="chatForm" id="chatForm"><input class="chatInput" id="chatInput" maxlength="250" placeholder="Message your opponent…" autocomplete="off"><button class="btn primary" id="sendChat" type="submit">Send</button></form></section>
  <section class="panel"><h2>Your Record</h2><div class="wl"><div><div class="label">Wins</div><div class="value" id="wins">0</div></div><div><div class="label">Losses</div><div class="value" id="losses">0</div></div></div><div class="note">Saved privately on this device.</div></section>
 </main>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import{initializeAppCheck,ReCaptchaEnterpriseProvider}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app-check.js";
 import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import{getDatabase,ref,get,onValue,runTransaction,set,query,orderByChild,endAt,limitToFirst,remove}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+import{getDatabase,ref,get,onValue,runTransaction,set,push,query,orderByChild,endAt,limitToFirst,remove}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 const config={apiKey:"AIzaSyB5qM-GjuW30wRd29TEjPG5zSDTCBM6R7U",authDomain:"the-last-circle-27557.firebaseapp.com",databaseURL:"https://the-last-circle-27557-default-rtdb.firebaseio.com",projectId:"the-last-circle-27557",storageBucket:"the-last-circle-27557.firebasestorage.app",messagingSenderId:"316967846509",appId:"1:316967846509:web:2dfaa23568cbcc7fcd3564"};
 const ROWS=[3,4,5,6],TOTAL=18,RECORD_KEY="last_circle_online_record_v1";
@@ -70,6 +73,22 @@ function saveRecord(){localStorage.setItem(RECORD_KEY,JSON.stringify(record));re
 function msg(text,error=false){$("message").textContent=text;$("message").classList.toggle("error",error)}
 function makeCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",bytes=crypto.getRandomValues(new Uint8Array(6));return[...bytes].map(x=>chars[x%chars.length]).join("")}
 function invite(code){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("room",code);return u.toString()}
+function updateNotificationButton(){
+ const button=$("notifications");
+ if(!("Notification" in window)){button.textContent="Notifications Unsupported";button.disabled=true;return}
+ button.disabled=Notification.permission==="denied";
+ button.textContent=Notification.permission==="granted"?"Notifications On":Notification.permission==="denied"?"Notifications Blocked":"Enable Notifications";
+}
+async function enableNotifications(){
+ if(!("Notification" in window))return;
+ try{await Notification.requestPermission()}catch(error){console.warn(error)}
+ updateNotificationButton();
+}
+function notifyOpponentMoved(){
+ if(!("Notification" in window)||Notification.permission!=="granted"||document.visibilityState==="visible")return;
+ const notice=new Notification("The Last Circle",{body:"Your opponent moved. It's your turn!",tag:`last-circle-${roomId}`});
+ notice.onclick=()=>{window.focus();notice.close()};
+}
 async function cleanupExpiredRooms(){
  try{
   const cutoff=Date.now()-86400000;
@@ -116,12 +135,14 @@ async function joinGame(given){
 }
 function enter(code){
  roomId=code;selected.clear();recordedRound=null;history.replaceState({},"",invite(code));
- $("lobby").classList.add("hidden");$("roomPanel").classList.remove("hidden");$("roomCode").textContent=code;$("shareLink").value=invite(code);
+ $("lobby").classList.add("hidden");$("roomPanel").classList.remove("hidden");$("chatPanel").classList.remove("hidden");$("roomCode").textContent=code;$("shareLink").value=invite(code);updateNotificationButton();
  if(stopListening)stopListening();
  stopListening=onValue(ref(db,`rooms/${code}`),snap=>{
   if(!snap.exists())return leaveRoom("That room is unavailable.",true);
-  room=snap.val();role=room.hostUid===user.uid?"host":room.guestUid===user.uid?"guest":null;
+  const previous=room,next=snap.val(),nextRole=next.hostUid===user.uid?"host":next.guestUid===user.uid?"guest":null;
+  room=next;role=nextRole;
   if(!role)return leaveRoom("That room already has two players.",true);render();
+  if(previous&&previous.status==="playing"&&room.status==="playing"&&previous.turn!==room.turn&&room.turn===role)notifyOpponentMoved();
  },e=>leaveRoom(e.message||"Connection lost.",true));
 }
 function render(){
@@ -131,7 +152,22 @@ function render(){
  $("status").textContent=!hasGuest?"Waiting for Player 2…":waiting?(role==="host"?"Choose who goes first":"Waiting for host to start…"):finished?(room.winner===role?"YOU WIN!":"YOU LOSE"):myTurn?"YOUR TURN":"OPPONENT'S TURN";
  if(finished&&recordedRound!==room.updatedAt){room.winner===role?record.wins++:record.losses++;recordedRound=room.updatedAt;saveRecord()}
  if(!myTurn)selected.clear();renderBoard();
+ renderChat();
+ $("chatInput").disabled=!hasGuest;$("sendChat").disabled=!hasGuest;
  $("finished").classList.toggle("hidden",!finished);$("again").classList.toggle("hidden",role!=="host");
+}
+function renderChat(){
+ const box=$("chatMessages"),messages=room?.messages?Object.values(room.messages).sort((a,b)=>(a.createdAt||0)-(b.createdAt||0)):[];
+ box.innerHTML="";
+ if(!messages.length){const emptyMessage=document.createElement("div");emptyMessage.className="chatEmpty";emptyMessage.textContent=room?.guestUid?"No messages yet. Say something.":"Chat opens when Player 2 joins.";box.appendChild(emptyMessage);return}
+ messages.slice(-100).forEach(message=>{const bubble=document.createElement("div");bubble.className="bubble"+(message.senderUid===user.uid?" mine":"");const name=document.createElement("div");name.className="bubbleName";name.textContent=message.senderUid===user.uid?"You":message.senderRole==="host"?"Player 1":"Player 2";const text=document.createElement("div");text.className="bubbleText";text.textContent=message.text;bubble.append(name,text);box.appendChild(bubble)});
+ box.scrollTop=box.scrollHeight;
+}
+async function sendChat(){
+ const input=$("chatInput"),text=input.value.trim();
+ if(!text||!roomId||!role||!room?.guestUid)return;
+ input.value="";
+ try{await set(push(ref(db,`rooms/${roomId}/messages`)),{senderUid:user.uid,senderRole:role,text:text.slice(0,250),createdAt:Date.now()})}catch(error){input.value=text;console.error(error)}
 }
 function renderBoard(){
  $("grid").innerHTML="";const circles=Array.isArray(room?.circles)?room.circles:empty();let index=0;
@@ -163,11 +199,12 @@ async function confirmMove(){
 async function again(){if(role!=="host")return;recordedRound=null;await transact(current=>{if(!current||current.status!=="finished"||current.hostUid!==user.uid)return;current.circles=empty();current.status="waiting";current.turn="host";current.winner="none";current.updatedAt=Date.now();return current})}
 function leaveRoom(text="Ready to create or join a game.",error=false){
  if(stopListening)stopListening();stopListening=null;roomId=room=role=null;selected.clear();history.replaceState({},"",location.pathname);
- $("roomPanel").classList.add("hidden");$("boardPanel").classList.add("hidden");$("lobby").classList.remove("hidden");msg(text,error);
+ $("roomPanel").classList.add("hidden");$("boardPanel").classList.add("hidden");$("chatPanel").classList.add("hidden");$("lobby").classList.remove("hidden");msg(text,error);
 }
 $("create").onclick=createGame;$("join").onclick=()=>joinGame();$("codeInput").oninput=e=>e.target.value=clean(e.target.value);$("codeInput").onkeydown=e=>{if(e.key==="Enter")joinGame()};
 $("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("shareLink").value)}catch{$("shareLink").select();document.execCommand("copy")}$("copy").textContent="Copied!";setTimeout(()=>$("copy").textContent="Copy Invite",1500)};
 $("leave").onclick=()=>leaveRoom();$("meFirst").onclick=()=>start("host");$("themFirst").onclick=()=>start("guest");$("confirm").onclick=confirmMove;$("clear").onclick=()=>{selected.clear();renderBoard()};$("again").onclick=again;$("newRoom").onclick=()=>leaveRoom();
+$("notifications").onclick=enableNotifications;$("chatForm").onsubmit=event=>{event.preventDefault();sendChat()};
 renderRecord();
 onAuthStateChanged(auth,current=>{if(!current)return;user=current;cleanupExpiredRooms();msg("Connected. Create a room or enter a code.");const requested=clean(new URLSearchParams(location.search).get("room")||"");if(requested)joinGame(requested)});
 signInAnonymously(auth).catch(e=>msg(`Firebase sign-in failed: ${e.message}`,true));
