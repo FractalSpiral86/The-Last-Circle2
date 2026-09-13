@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<!-- VERSION: MULTIPLAYER-GUEST-FIX-AND-APP-CHECK-2026-09-13 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -50,12 +51,15 @@ h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12
 </main>
 <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import{initializeAppCheck,ReCaptchaEnterpriseProvider}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app-check.js";
 import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
 import{getDatabase,ref,get,onValue,runTransaction,set}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 const config={apiKey:"AIzaSyB5qM-GjuW30wRd29TEjPG5zSDTCBM6R7U",authDomain:"the-last-circle-27557.firebaseapp.com",databaseURL:"https://the-last-circle-27557-default-rtdb.firebaseio.com",projectId:"the-last-circle-27557",storageBucket:"the-last-circle-27557.firebasestorage.app",messagingSenderId:"316967846509",appId:"1:316967846509:web:2dfaa23568cbcc7fcd3564"};
 const ROWS=[3,4,5,6],TOTAL=18,RECORD_KEY="last_circle_online_record_v1";
-const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
+const app=initializeApp(config);
+initializeAppCheck(app,{provider:new ReCaptchaEnterpriseProvider("6LcrobgtAAAAABgRw31ixDFtTqMr5S_P8RmJyWQ5"),isTokenAutoRefreshEnabled:true});
+const auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
 let user=null,roomId=null,room=null,role=null,selected=new Set(),stopListening=null,recordedRound=null;
 let record=JSON.parse(localStorage.getItem(RECORD_KEY)||'{"wins":0,"losses":0}');
 const empty=()=>Array(TOTAL).fill(false);
@@ -85,13 +89,18 @@ async function joinGame(given){
  $("join").disabled=true;msg("Joining room…");
  try{
   const roomRef=ref(db,`rooms/${code}`);
-  const result=await runTransaction(roomRef,current=>{
-   if(!current)return;
-   if(current.hostUid===user.uid||current.guestUid===user.uid)return current;
-   if(current.guestUid)return;
-   current.guestUid=user.uid;current.updatedAt=Date.now();return current;
+  const roomCheck=await get(roomRef);
+  if(!roomCheck.exists())throw Error("That room does not exist.");
+  const existing=roomCheck.val();
+  if(existing.hostUid===user.uid||existing.guestUid===user.uid){enter(code);return}
+  if(existing.guestUid)throw Error("That room already has two players.");
+  const guestRef=ref(db,`rooms/${code}/guestUid`);
+  const result=await runTransaction(guestRef,current=>{
+   if(current===null)return user.uid;
+   if(current===user.uid)return current;
+   return;
   });
-  if(!result.committed){const check=await get(roomRef);throw Error(check.exists()?"That room already has two players.":"That room does not exist.")}
+  if(!result.committed)throw Error("That room already has two players.");
   enter(code);
  }catch(e){console.error(e);msg(e.message||"Could not join.",true)}
  finally{$("join").disabled=false}
