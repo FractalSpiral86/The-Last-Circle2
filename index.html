@@ -81,21 +81,53 @@ async function createGame(){
 }
 async function joinGame(given){
  if(!user)return msg("Still connecting. Try again.",true);
- const code=clean(given||$("codeInput").value);if(code.length!==6)return msg("Enter the six-character code.",true);
- $("join").disabled=true;msg("Joining room…");
+
+ const code=clean(given||$("codeInput").value);
+ if(code.length!==6)return msg("Enter the six-character code.",true);
+
+ $("join").disabled=true;
+ msg("Joining room…");
+
  try{
   const roomRef=ref(db,`rooms/${code}`);
-  const result=await runTransaction(roomRef,current=>{
-   if(!current)return;
-   if(current.hostUid===user.uid||current.guestUid===user.uid)return current;
-   if(current.guestUid)return;
-   current.guestUid=user.uid;current.updatedAt=Date.now();return current;
+  const roomCheck=await get(roomRef);
+
+  if(!roomCheck.exists()){
+   throw Error("That room does not exist.");
+  }
+
+  const existing=roomCheck.val();
+
+  if(existing.hostUid===user.uid||existing.guestUid===user.uid){
+   enter(code);
+   return;
+  }
+
+  if(existing.guestUid){
+   throw Error("That room already has two players.");
+  }
+
+  const guestRef=ref(db,`rooms/${code}/guestUid`);
+
+  const result=await runTransaction(guestRef,current=>{
+   if(current===null)return user.uid;
+   if(current===user.uid)return current;
+   return;
   });
-  if(!result.committed){const check=await get(roomRef);throw Error(check.exists()?"That room already has two players.":"That room does not exist.")}
+
+  if(!result.committed){
+   throw Error("That room already has two players.");
+  }
+
   enter(code);
- }catch(e){console.error(e);msg(e.message||"Could not join.",true)}
- finally{$("join").disabled=false}
-}
+
+ }catch(e){
+  console.error(e);
+  msg(e.message||"Could not join.",true);
+
+ }finally{
+  $("join").disabled=false;
+ }
 function enter(code){
  roomId=code;selected.clear();recordedRound=null;history.replaceState({},"",invite(code));
  $("lobby").classList.add("hidden");$("roomPanel").classList.remove("hidden");$("roomCode").textContent=code;$("shareLink").value=invite(code);
