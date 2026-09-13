@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- VERSION: MULTIPLAYER-GUEST-FIX-AND-APP-CHECK-2026-09-13 -->
+<!-- VERSION: MULTIPLAYER-APP-CHECK-24H-CLEANUP-2026-09-13 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -53,7 +53,7 @@ h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12
 import{initializeApp}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
 import{initializeAppCheck,ReCaptchaEnterpriseProvider}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app-check.js";
 import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
-import{getDatabase,ref,get,onValue,runTransaction,set}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
+import{getDatabase,ref,get,onValue,runTransaction,set,query,orderByChild,endAt,limitToFirst,remove}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
 const config={apiKey:"AIzaSyB5qM-GjuW30wRd29TEjPG5zSDTCBM6R7U",authDomain:"the-last-circle-27557.firebaseapp.com",databaseURL:"https://the-last-circle-27557-default-rtdb.firebaseio.com",projectId:"the-last-circle-27557",storageBucket:"the-last-circle-27557.firebasestorage.app",messagingSenderId:"316967846509",appId:"1:316967846509:web:2dfaa23568cbcc7fcd3564"};
 const ROWS=[3,4,5,6],TOTAL=18,RECORD_KEY="last_circle_online_record_v1";
@@ -70,6 +70,15 @@ function saveRecord(){localStorage.setItem(RECORD_KEY,JSON.stringify(record));re
 function msg(text,error=false){$("message").textContent=text;$("message").classList.toggle("error",error)}
 function makeCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",bytes=crypto.getRandomValues(new Uint8Array(6));return[...bytes].map(x=>chars[x%chars.length]).join("")}
 function invite(code){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("room",code);return u.toString()}
+async function cleanupExpiredRooms(){
+ try{
+  const cutoff=Date.now()-86400000;
+  const expired=query(ref(db,"rooms"),orderByChild("updatedAt"),endAt(cutoff),limitToFirst(25));
+  const snapshot=await get(expired),deletions=[];
+  snapshot.forEach(roomSnapshot=>deletions.push(remove(roomSnapshot.ref)));
+  await Promise.allSettled(deletions);
+ }catch(error){console.warn("Expired-room cleanup skipped:",error.message)}
+}
 
 async function createGame(){
  if(!user)return msg("Still connecting. Try again.",true);
@@ -160,7 +169,7 @@ $("create").onclick=createGame;$("join").onclick=()=>joinGame();$("codeInput").o
 $("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("shareLink").value)}catch{$("shareLink").select();document.execCommand("copy")}$("copy").textContent="Copied!";setTimeout(()=>$("copy").textContent="Copy Invite",1500)};
 $("leave").onclick=()=>leaveRoom();$("meFirst").onclick=()=>start("host");$("themFirst").onclick=()=>start("guest");$("confirm").onclick=confirmMove;$("clear").onclick=()=>{selected.clear();renderBoard()};$("again").onclick=again;$("newRoom").onclick=()=>leaveRoom();
 renderRecord();
-onAuthStateChanged(auth,current=>{if(!current)return;user=current;msg("Connected. Create a room or enter a code.");const requested=clean(new URLSearchParams(location.search).get("room")||"");if(requested)joinGame(requested)});
+onAuthStateChanged(auth,current=>{if(!current)return;user=current;cleanupExpiredRooms();msg("Connected. Create a room or enter a code.");const requested=clean(new URLSearchParams(location.search).get("room")||"");if(requested)joinGame(requested)});
 signInAnonymously(auth).catch(e=>msg(`Firebase sign-in failed: ${e.message}`,true));
 </script>
 </body>
