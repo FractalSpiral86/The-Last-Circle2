@@ -1,331 +1,158 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050505">
 <title>The Last Circle</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&display=swap" rel="stylesheet">
-
 <style>
-:root{
-  --bg:#050505;
-  --panel:#071607;
-  --lime:#39ff14;
-  --limeGlow:rgba(57,255,20,.65);
-  --border:rgba(57,255,20,.25);
-  --text:#eaeaea;
-  --shadow:0 0 40px rgba(57,255,20,.25);
-  --radius:18px;
-
-  /* Tuned so 6 circles ALWAYS fit on typical mobile widths */
-  --dot: clamp(40px, 10.2vw, 54px);
-  --gap: clamp(8px, 2.1vw, 14px);
-}
-
-*{box-sizing:border-box;}
-
-body{
-  margin:0;
-  background:radial-gradient(circle at top left,#0b250b,#000 60%);
-  color:var(--text);
-  font-family:system-ui,Arial,sans-serif;
-  display:flex;
-  justify-content:center;
-  align-items:center;
-  min-height:100vh;
-  padding:20px;
-}
-
-.app{
-  width:100%;
-  max-width:1100px;
-  display:flex;
-  flex-direction:column;
-  gap:16px;
-}
-
-/* GAME TITLE */
-.gameTitle{
-  text-align:center;
-  font-family:'Orbitron', sans-serif;
-  font-size:42px;
-  letter-spacing:4px;
-  color:var(--lime);
-  text-transform:uppercase;
-  text-shadow:
-    0 0 12px rgba(57,255,20,.8),
-    0 0 30px rgba(57,255,20,.6),
-    0 0 60px rgba(57,255,20,.35);
-  margin-bottom:10px;
-}
-
-/* PANELS */
-.panel{
-  background:linear-gradient(180deg,rgba(57,255,20,.08),rgba(0,0,0,.6));
-  border:1px solid var(--border);
-  border-radius:var(--radius);
-  padding:16px;
-  box-shadow:var(--shadow);
-}
-
-/* HEADERS */
-.rules h2,
-.boardTitle,
-.record h2{
-  margin:0 0 10px;
-  color:var(--lime);
-  text-transform:uppercase;
-  letter-spacing:.12em;
-  font-size:14px;
-}
-
-/* RULES */
-.rules ol{
-  margin:0;
-  padding-left:20px;
-  line-height:1.5;
-  font-size:14px;
-}
-
-/* GAME BOARD */
-.boardHeader{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:10px;
-  gap:10px;
-}
-
-.resetBtn{
-  background:#3a0d0d;
-  border:1px solid #7a2c2c;
-  color:#ff9c9c;
-  padding:6px 14px;
-  border-radius:10px;
-  font-weight:bold;
-  cursor:pointer;
-}
-
-.circleGrid{
-  display:flex;
-  flex-direction:column;
-  gap:var(--gap);
-  align-items:flex-start;
-  overflow:hidden;
-}
-
-/* IMPORTANT: no wrapping, so the "6th" circle never drops */
-.circleRow{
-  display:flex;
-  flex-wrap:nowrap;
-  gap:var(--gap);
-}
-
-/* CIRCLES */
-.circle{
-  width:var(--dot);
-  height:var(--dot);
-  border-radius:50%;
-  border:2px solid var(--lime);
-  background:transparent;
-  box-shadow:0 0 12px rgba(57,255,20,.25);
-  cursor:pointer;
-  transition:0.15s;
-  flex:0 0 auto;
-}
-
-.circle.on{
-  background:var(--lime);
-  box-shadow:
-    0 0 20px var(--limeGlow),
-    0 0 40px rgba(57,255,20,.35);
-}
-
-.note{
-  margin-top:10px;
-  font-size:12px;
-  opacity:.7;
-}
-
-/* HOST RECORD */
-.wl{
-  display:flex;
-  justify-content:space-between;
-  background:rgba(0,0,0,.4);
-  padding:10px 14px;
-  border-radius:12px;
-  margin-bottom:12px;
-  border:1px solid var(--border);
-}
-
-.stat .label{
-  font-size:12px;
-  opacity:.7;
-}
-
-.stat .value{
-  font-size:26px;
-  font-weight:bold;
-}
-
-.btnRow{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:12px;
-  margin-bottom:10px;
-}
-
-.btn{
-  padding:12px;
-  border-radius:14px;
-  font-weight:bold;
-  text-transform:uppercase;
-  border:none;
-  cursor:pointer;
-}
-
-.btnAdd{
-  background:#063a06;
-  color:var(--lime);
-}
-
-.btnSub{
-  background:#222;
-  color:#ccc;
-}
-
-.btnReset{
-  background:#3a0d0d;
-  color:#ff9c9c;
-  border:1px solid #7a2c2c;
-}
-
-@media (max-width: 420px){
-  .gameTitle{ font-size:34px; letter-spacing:3px; }
-}
+:root{--lime:#39ff14;--border:rgba(57,255,20,.25);--muted:#a5ada5;--dot:clamp(40px,10.2vw,54px);--gap:clamp(8px,2.1vw,14px)}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:20px;background:radial-gradient(circle at top left,#0b250b,#000 60%);color:#eaeaea;font-family:system-ui,Arial,sans-serif;display:flex;justify-content:center}
+button,input{font:inherit}.app{width:100%;max-width:1100px;display:flex;flex-direction:column;gap:16px}.hidden{display:none!important}
+.title{text-align:center;font:800 42px Orbitron,sans-serif;letter-spacing:4px;color:var(--lime);text-shadow:0 0 12px #39ff14cc,0 0 35px #39ff1480;margin:12px 0 4px}
+.panel{padding:16px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(180deg,#39ff1414,#0009);box-shadow:0 0 40px #39ff1440}
+h2{margin:0 0 10px;color:var(--lime);text-transform:uppercase;letter-spacing:.12em;font-size:14px}.rules ol{margin:0;padding-left:20px;line-height:1.5;font-size:14px}
+.lobbyGrid,.startButtons,.actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.joinRow,.shareRow,.topRow,.badges{display:flex;gap:8px;align-items:center}.topRow{justify-content:space-between;flex-wrap:wrap}.badges{flex-wrap:wrap}
+.btn{padding:12px;border-radius:13px;border:1px solid transparent;font-weight:800;text-transform:uppercase;cursor:pointer}.btn:disabled{opacity:.4;cursor:not-allowed}.primary{background:#063a06;color:var(--lime);border-color:#39ff1459}.secondary{background:#222;color:#ddd;border-color:#444}.danger{background:#3a0d0d;color:#ff9c9c;border-color:#7a2c2c}
+.input{min-width:0;flex:1;padding:12px;border:1px solid var(--border);border-radius:12px;background:#020702;color:#fff;text-transform:uppercase;letter-spacing:.15em;font-weight:800}.message,.note{margin-top:10px;min-height:18px;color:var(--muted);font-size:12px}.error{color:#ff7070}
+.badge{padding:7px 11px;border:1px solid var(--border);border-radius:999px;background:#0007;font-size:12px}.badge strong{color:var(--lime);letter-spacing:.1em}.status{text-align:center;padding:12px 0 4px;color:var(--lime);font:600 16px Orbitron,sans-serif}
+.shareRow{margin-top:12px}.shareLink{min-width:0;flex:1;padding:10px;border:1px solid var(--border);border-radius:10px;background:#020702;color:#ccc}.startBox{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}.startBox p{margin:0 0 10px;color:var(--muted);font-size:13px}
+.circleGrid{display:flex;flex-direction:column;gap:var(--gap);align-items:flex-start;overflow:hidden}.circleRow{display:flex;gap:var(--gap)}.circle{width:var(--dot);height:var(--dot);flex:0 0 auto;padding:0;border:2px solid var(--lime);border-radius:50%;background:transparent;box-shadow:0 0 12px #39ff1440;cursor:pointer;transition:.15s}.circle.selected{background:#39ff1459;box-shadow:0 0 22px #39ff14aa}.circle.removed{background:var(--lime);box-shadow:0 0 25px #39ff14aa;opacity:.68}.actions{margin-top:14px;grid-template-columns:2fr 1fr}
+.wl{display:flex;justify-content:space-between;padding:10px 14px;border:1px solid var(--border);border-radius:12px;background:#0006}.label{font-size:12px;color:var(--muted)}.value{font-size:26px;font-weight:800}
+@media(max-width:620px){.title{font-size:34px;letter-spacing:3px}.lobbyGrid,.startButtons{grid-template-columns:1fr}.shareRow{display:grid}}
 </style>
 </head>
-
 <body>
-<div class="app">
+<main class="app">
+ <div class="title">THE LAST CIRCLE</div>
+ <section class="panel rules"><h2>Rules</h2><ol><li>RPS to determine who goes first.</li><li>On your turn, fill one or more circles from one row only.</li><li>The player forced to fill the last circle loses.</li></ol></section>
+ <section class="panel" id="lobby">
+  <h2>Online Game</h2>
+  <div class="lobbyGrid">
+   <button class="btn primary" id="create">Create Game</button>
+   <div class="joinRow"><input class="input" id="codeInput" maxlength="6" placeholder="ROOM CODE" autocomplete="off"><button class="btn secondary" id="join">Join</button></div>
+  </div>
+  <div class="message" id="message">Connecting securely…</div>
+ </section>
+ <section class="panel hidden" id="roomPanel">
+  <div class="topRow"><div class="badges"><span class="badge">Room <strong id="roomCode">------</strong></span><span class="badge" id="playerBadge">Player —</span></div><button class="btn danger" id="leave">Leave</button></div>
+  <div class="status" id="status">Loading…</div>
+  <div class="shareRow" id="shareRow"><input class="shareLink" id="shareLink" readonly><button class="btn secondary" id="copy">Copy Invite</button></div>
+  <div class="startBox hidden" id="startBox"><p>After rock-paper-scissors, choose who should move first:</p><div class="startButtons"><button class="btn primary" id="meFirst">I Start</button><button class="btn secondary" id="themFirst">Opponent Starts</button></div></div>
+ </section>
+ <section class="panel hidden" id="boardPanel">
+  <h2>Game Board</h2><div class="circleGrid" id="grid"></div><div class="note" id="note"></div>
+  <div class="actions"><button class="btn primary" id="confirm" disabled>Confirm Move</button><button class="btn secondary" id="clear" disabled>Clear</button></div>
+  <div class="actions hidden" id="finished"><button class="btn primary" id="again">Play Again</button><button class="btn secondary" id="newRoom">New Room</button></div>
+ </section>
+ <section class="panel"><h2>Your Record</h2><div class="wl"><div><div class="label">Wins</div><div class="value" id="wins">0</div></div><div><div class="label">Losses</div><div class="value" id="losses">0</div></div></div><div class="note">Saved privately on this device.</div></section>
+</main>
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-app.js";
+import{getAuth,onAuthStateChanged,signInAnonymously}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-auth.js";
+import{getDatabase,ref,get,onValue,runTransaction,set}from"https://www.gstatic.com/firebasejs/12.3.0/firebase-database.js";
 
-  <div class="gameTitle">THE LAST CIRCLE</div>
+const config={apiKey:"AIzaSyB5qM-GjuW30wRd29TEjPG5zSDTCBM6R7U",authDomain:"the-last-circle-27557.firebaseapp.com",databaseURL:"https://the-last-circle-27557-default-rtdb.firebaseio.com",projectId:"the-last-circle-27557",storageBucket:"the-last-circle-27557.firebasestorage.app",messagingSenderId:"316967846509",appId:"1:316967846509:web:2dfaa23568cbcc7fcd3564"};
+const ROWS=[3,4,5,6],TOTAL=18,RECORD_KEY="last_circle_online_record_v1";
+const app=initializeApp(config),auth=getAuth(app),db=getDatabase(app),$=id=>document.getElementById(id);
+let user=null,roomId=null,room=null,role=null,selected=new Set(),stopListening=null,recordedRound=null;
+let record=JSON.parse(localStorage.getItem(RECORD_KEY)||'{"wins":0,"losses":0}');
+const empty=()=>Array(TOTAL).fill(false);
+const clean=v=>v.toUpperCase().replace(/[^A-Z2-9]/g,"").slice(0,6);
+const rowOf=i=>i<3?0:i<7?1:i<12?2:3;
+function renderRecord(){$("wins").textContent=record.wins;$("losses").textContent=record.losses}
+function saveRecord(){localStorage.setItem(RECORD_KEY,JSON.stringify(record));renderRecord()}
+function msg(text,error=false){$("message").textContent=text;$("message").classList.toggle("error",error)}
+function makeCode(){const chars="ABCDEFGHJKLMNPQRSTUVWXYZ23456789",bytes=crypto.getRandomValues(new Uint8Array(6));return[...bytes].map(x=>chars[x%chars.length]).join("")}
+function invite(code){const u=new URL(location.href);u.search="";u.hash="";u.searchParams.set("room",code);return u.toString()}
 
-  <section class="panel rules">
-    <h2>Rules</h2>
-    <ol>
-      <li>RPS to determine who goes first.</li>
-      <li>When it's your turn, eliminate one or more circles from one row and only one row.</li>
-      <li>The person left with the last circle to fill in <b>loses</b>.</li>
-    </ol>
-  </section>
-
-  <section class="panel">
-    <div class="boardHeader">
-      <div class="boardTitle">Game Board</div>
-      <button class="resetBtn" id="resetCircles">Reset</button>
-    </div>
-
-    <div class="circleGrid" id="circleGrid"></div>
-
-    <div class="note">
-      Tap to toggle. Circles save automatically in your browser.
-    </div>
-  </section>
-
-  <section class="panel record">
-    <h2>Host Record</h2>
-
-    <div class="wl">
-      <div class="stat">
-        <div class="label">Wins</div>
-        <div class="value" id="wins">0</div>
-      </div>
-      <div class="stat">
-        <div class="label">Losses</div>
-        <div class="value" id="losses">0</div>
-      </div>
-    </div>
-
-    <div class="btnRow">
-      <button class="btn btnAdd" id="addWin">+ Win</button>
-      <button class="btn btnSub" id="subWin">- Win</button>
-      <button class="btn btnAdd" id="addLoss">+ Loss</button>
-      <button class="btn btnSub" id="subLoss">- Loss</button>
-    </div>
-
-    <button class="btn btnReset" id="resetRecord">Reset Record</button>
-  </section>
-
-</div>
-
-<script>
-const ROWS = [3,4,5,6];
-const TOTAL = ROWS.reduce((a,b)=>a+b,0);
-const STORAGE_KEY = "last_circle_final_v3_fit6";
-
-let state = JSON.parse(localStorage.getItem(STORAGE_KEY)) || {
-  circles:Array(TOTAL).fill(false),
-  wins:0,
-  losses:0
-};
-
-function save(){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+async function createGame(){
+ if(!user)return msg("Still connecting. Try again.",true);
+ $("create").disabled=true;msg("Creating your room…");
+ try{
+  let code=null;
+  for(let i=0;i<8;i++){const candidate=makeCode();if(!(await get(ref(db,`rooms/${candidate}`))).exists()){code=candidate;break}}
+  if(!code)throw Error("Could not create a unique room.");
+  await set(ref(db,`rooms/${code}`),{hostUid:user.uid,status:"waiting",turn:"host",circles:empty(),winner:"none",updatedAt:Date.now()});
+  enter(code);
+ }catch(e){console.error(e);msg(e.message||"Room creation failed.",true)}
+ finally{$("create").disabled=false}
 }
-
-const grid = document.getElementById("circleGrid");
-
-function renderCircles(){
-  grid.innerHTML = "";
-  let idx = 0;
-
-  ROWS.forEach(count => {
-    const row = document.createElement("div");
-    row.className = "circleRow";
-
-    for(let i=0;i<count;i++){
-      const c = document.createElement("div");
-      c.className = "circle" + (state.circles[idx] ? " on" : "");
-      const index = idx;
-      c.onclick = () => toggleCircle(index);
-      row.appendChild(c);
-      idx++;
-    }
-    grid.appendChild(row);
+async function joinGame(given){
+ if(!user)return msg("Still connecting. Try again.",true);
+ const code=clean(given||$("codeInput").value);if(code.length!==6)return msg("Enter the six-character code.",true);
+ $("join").disabled=true;msg("Joining room…");
+ try{
+  const roomRef=ref(db,`rooms/${code}`);
+  const result=await runTransaction(roomRef,current=>{
+   if(!current)return;
+   if(current.hostUid===user.uid||current.guestUid===user.uid)return current;
+   if(current.guestUid)return;
+   current.guestUid=user.uid;current.updatedAt=Date.now();return current;
   });
+  if(!result.committed){const check=await get(roomRef);throw Error(check.exists()?"That room already has two players.":"That room does not exist.")}
+  enter(code);
+ }catch(e){console.error(e);msg(e.message||"Could not join.",true)}
+ finally{$("join").disabled=false}
 }
-
-function toggleCircle(i){
-  state.circles[i] = !state.circles[i];
-  save();
-  renderCircles();
+function enter(code){
+ roomId=code;selected.clear();recordedRound=null;history.replaceState({},"",invite(code));
+ $("lobby").classList.add("hidden");$("roomPanel").classList.remove("hidden");$("roomCode").textContent=code;$("shareLink").value=invite(code);
+ if(stopListening)stopListening();
+ stopListening=onValue(ref(db,`rooms/${code}`),snap=>{
+  if(!snap.exists())return leaveRoom("That room is unavailable.",true);
+  room=snap.val();role=room.hostUid===user.uid?"host":room.guestUid===user.uid?"guest":null;
+  if(!role)return leaveRoom("That room already has two players.",true);render();
+ },e=>leaveRoom(e.message||"Connection lost.",true));
 }
-
-const winsEl = document.getElementById("wins");
-const lossesEl = document.getElementById("losses");
-
-function renderRecord(){
-  winsEl.textContent = state.wins;
-  lossesEl.textContent = state.losses;
+function render(){
+ const hasGuest=!!room.guestUid,waiting=room.status==="waiting",finished=room.status==="finished",myTurn=room.status==="playing"&&room.turn===role;
+ $("playerBadge").textContent=role==="host"?"Player 1 · Host":"Player 2 · Guest";
+ $("shareRow").classList.toggle("hidden",hasGuest);$("startBox").classList.toggle("hidden",!(role==="host"&&hasGuest&&waiting));$("boardPanel").classList.toggle("hidden",waiting);
+ $("status").textContent=!hasGuest?"Waiting for Player 2…":waiting?(role==="host"?"Choose who goes first":"Waiting for host to start…"):finished?(room.winner===role?"YOU WIN!":"YOU LOSE"):myTurn?"YOUR TURN":"OPPONENT'S TURN";
+ if(finished&&recordedRound!==room.updatedAt){room.winner===role?record.wins++:record.losses++;recordedRound=room.updatedAt;saveRecord()}
+ if(!myTurn)selected.clear();renderBoard();
+ $("finished").classList.toggle("hidden",!finished);$("again").classList.toggle("hidden",role!=="host");
 }
-
-document.getElementById("addWin").onclick = () => { state.wins++; save(); renderRecord(); };
-document.getElementById("subWin").onclick = () => { if(state.wins > 0) state.wins--; save(); renderRecord(); };
-document.getElementById("addLoss").onclick = () => { state.losses++; save(); renderRecord(); };
-document.getElementById("subLoss").onclick = () => { if(state.losses > 0) state.losses--; save(); renderRecord(); };
-document.getElementById("resetRecord").onclick = () => { state.wins = 0; state.losses = 0; save(); renderRecord(); };
-
-document.getElementById("resetCircles").onclick = () => {
-  state.circles = Array(TOTAL).fill(false);
-  save();
-  renderCircles();
-};
-
-renderCircles();
+function renderBoard(){
+ $("grid").innerHTML="";const circles=Array.isArray(room?.circles)?room.circles:empty();let index=0;
+ ROWS.forEach(count=>{const row=document.createElement("div");row.className="circleRow";
+  for(let n=0;n<count;n++){const i=index++,b=document.createElement("button"),removed=!!circles[i];b.className="circle"+(removed?" removed":selected.has(i)?" selected":"");b.disabled=removed||room.status!=="playing"||room.turn!==role;b.ariaLabel=removed?"Filled circle":`Circle ${i+1}`;b.onclick=()=>selectCircle(i);row.appendChild(b)}
+  $("grid").appendChild(row);
+ });
+ const myTurn=room?.status==="playing"&&room.turn===role;$("confirm").disabled=!myTurn||!selected.size;$("clear").disabled=!selected.size;
+ $("note").textContent=myTurn?"Select circles from one row, then confirm.":room?.status==="finished"?"Game over.":"Waiting for your opponent…";
+}
+function selectCircle(i){
+ if(selected.size&&rowOf([...selected][0])!==rowOf(i)){$("note").textContent="One row only—clear your selection to choose another row.";return}
+ selected.has(i)?selected.delete(i):selected.add(i);renderBoard();
+}
+const transact=updater=>runTransaction(ref(db,`rooms/${roomId}`),updater,{applyLocally:false});
+async function start(first){if(role!=="host")return;await transact(current=>{if(!current||current.status!=="waiting"||!current.guestUid||current.hostUid!==user.uid)return;current.status="playing";current.turn=first;current.updatedAt=Date.now();return current})}
+async function confirmMove(){
+ if(!selected.size)return;const chosen=[...selected];$("confirm").disabled=true;
+ try{const result=await transact(current=>{
+  if(!current||current.status!=="playing"||current.turn!==role)return;
+  const circles=Array.isArray(current.circles)?[...current.circles]:empty();
+  if(chosen.some(i=>circles[i])||new Set(chosen.map(rowOf)).size!==1)return;
+  chosen.forEach(i=>circles[i]=true);current.circles=circles;
+  if(circles.every(Boolean)){current.status="finished";current.winner=role==="host"?"guest":"host"}else current.turn=role==="host"?"guest":"host";
+  current.updatedAt=Date.now();return current;
+ });if(!result.committed)throw Error("Move rejected because the game changed.");selected.clear()}
+ catch(e){console.error(e);$("note").textContent=e.message}
+}
+async function again(){if(role!=="host")return;recordedRound=null;await transact(current=>{if(!current||current.status!=="finished"||current.hostUid!==user.uid)return;current.circles=empty();current.status="waiting";current.turn="host";current.winner="none";current.updatedAt=Date.now();return current})}
+function leaveRoom(text="Ready to create or join a game.",error=false){
+ if(stopListening)stopListening();stopListening=null;roomId=room=role=null;selected.clear();history.replaceState({},"",location.pathname);
+ $("roomPanel").classList.add("hidden");$("boardPanel").classList.add("hidden");$("lobby").classList.remove("hidden");msg(text,error);
+}
+$("create").onclick=createGame;$("join").onclick=()=>joinGame();$("codeInput").oninput=e=>e.target.value=clean(e.target.value);$("codeInput").onkeydown=e=>{if(e.key==="Enter")joinGame()};
+$("copy").onclick=async()=>{try{await navigator.clipboard.writeText($("shareLink").value)}catch{$("shareLink").select();document.execCommand("copy")}$("copy").textContent="Copied!";setTimeout(()=>$("copy").textContent="Copy Invite",1500)};
+$("leave").onclick=()=>leaveRoom();$("meFirst").onclick=()=>start("host");$("themFirst").onclick=()=>start("guest");$("confirm").onclick=confirmMove;$("clear").onclick=()=>{selected.clear();renderBoard()};$("again").onclick=again;$("newRoom").onclick=()=>leaveRoom();
 renderRecord();
+onAuthStateChanged(auth,current=>{if(!current)return;user=current;msg("Connected. Create a room or enter a code.");const requested=clean(new URLSearchParams(location.search).get("room")||"");if(requested)joinGame(requested)});
+signInAnonymously(auth).catch(e=>msg(`Firebase sign-in failed: ${e.message}`,true));
 </script>
-
 </body>
 </html>
